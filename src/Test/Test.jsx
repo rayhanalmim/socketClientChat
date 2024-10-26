@@ -1,14 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 // import {
 //   CLTable, CLTableActionButton, CLTableActionButtons, CLTableBody, CLTableCell, CLTableDate, CLTableDateTimeCell, CLTableHead, CLTableHeader, CLTableImageCell, CLTableRow, CLTableTime, Header,
 // } from "@antopolis/admin-component-library/dist/elements";
 // import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
 // import { useEntityState } from "@antopolis/admin-component-library/dist/hooks";
 import {
-  CLTable, CLTableActionButton, CLTableActionButtons, CLTableBody, CLTableCell, CLTableDate, CLTableDateTimeCell, CLTableHead, CLTableHeader, CLTableImageCell, CLTableRow, CLTableTime, Header,CLTableFooter
+  CLTable,
+  CLTableActionButton,
+  CLTableActionButtons,
+  CLTableBody,
+  CLTableCell,
+  CLTableDate,
+  CLTableDateTimeCell,
+  CLTableHead,
+  CLTableHeader,
+  CLTableImageCell,
+  CLTableRow,
+  CLTableTime,
+  Header,
+  CLTableFooter,
 } from "@antopolis/admin-component-library/src/Components/Elements/Elements";
 import { CardLayout } from "@antopolis/admin-component-library/src/Layouts/Layouts";
-import { useEntityState } from "@antopolis/admin-component-library/src/Hooks/Hooks";
+import { useEntity } from "@antopolis/admin-component-library/src/Hooks/Hooks";
 
 // const tabs = [
 //   { value: "active", label: "Active" },
@@ -18,7 +31,9 @@ import { useEntityState } from "@antopolis/admin-component-library/src/Hooks/Hoo
 
 function Test() {
   const [modal, setModal] = React.useState(false);
-  const { data, setViewModal } = useEntityState();
+  const { data, setViewModal, viewModal } = useEntity();
+
+  console.log("test => ", viewModal);
 
   const headers = [
     { label: "", className: "min-w-32" },
