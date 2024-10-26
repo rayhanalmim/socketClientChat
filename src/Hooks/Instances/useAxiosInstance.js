@@ -1,9 +1,9 @@
-import { AuthContext } from '@/Context/AuthContext';
+import { AuthContext } from '@antopolis/admin-component-library/src/Contexts/Contexts';
 import axios from 'axios';
 import { useContext, useMemo } from 'react';
 
 export function useAxiosInstance() {
-    const { employee, logout } = useContext(AuthContext);
+    const { member, logout } = useContext(AuthContext);
     const axiosInstance = useMemo(
         () =>
             axios.create({
@@ -11,10 +11,10 @@ export function useAxiosInstance() {
                     import.meta.env.VITE_APP_BACKEND_URL +
                     import.meta.env.VITE_APP_AXIOS_INSTANCE_ROUTE,
                 headers: {
-                    Authorization: 'Bearer ' + employee?.token,
+                    Authorization: 'Bearer ' + member?.token,
                 },
             }),
-        [employee],
+        [member],
     );
 
     axiosInstance.interceptors.response.use(
@@ -22,7 +22,7 @@ export function useAxiosInstance() {
             return res;
         },
         (err) => {
-            if (employee?.token && err?.response?.status === 401) {
+            if (member?.token && err?.response?.status === 401) {
                 logout();
             }
             return Promise.reject(err);
