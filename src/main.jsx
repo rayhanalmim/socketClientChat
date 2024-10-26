@@ -1,11 +1,18 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ThemeProvider, AuthContextProvider } from '@antopolis/admin-component-library/dist/contexts'
-import { Toaster } from '@antopolis/admin-component-library/dist/ui'
-import { CLRouterProvider } from '@antopolis/admin-component-library/dist/helper'
+import './index.css'
 import routes from './routes/routes'
 
-import './index.css'
+// import { ThemeProvider, AuthContextProvider } from '@antopolis/admin-component-library/dist/contexts'
+// import { Toaster } from '@antopolis/admin-component-library/dist/ui'
+// import { CLRouterProvider } from '@antopolis/admin-component-library/dist/helper'
+
+// import '@antopolis/admin-component-library/dist/main.css'
+
+import { ThemeProvider, AuthContextProvider } from '@antopolis/admin-component-library/src/Contexts/Contexts'
+import { Toaster } from '@antopolis/admin-component-library/src/Components/ui/ui'
+import { CLRouterProvider } from '@antopolis/admin-component-library/src/Helpers/Helpers'
+
 import '@antopolis/admin-component-library/dist/main.css'
 
 createRoot(document.getElementById('root')).render(

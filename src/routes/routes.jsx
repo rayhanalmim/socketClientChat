@@ -1,12 +1,12 @@
-// import authRoutes from '@/components/screens/AuthScreen/AuthRoutes';
-// import AuthScreens from '@/components/screens/AuthScreen/AuthScreens';
 
-// import MainRoutes from '@/components/screens/MainScreen/MainRoutes';
-// import MainScreens from '@/components/screens/MainScreen/MainScreens';
-import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/dist/helper';
-import { AuthScreen } from '@antopolis/admin-component-library/dist/screens'
+// import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/dist/helper';
+// import { AuthScreen } from '@antopolis/admin-component-library/dist/screens'
+import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/src/Helpers/Helpers';
+import { AuthScreen } from '@antopolis/admin-component-library/src/Screens/Screens'
+
 import authRoutes from '../Screens/AuthScreens/AuthRoutes';
 import Test from '../Test/Test';
+import App from '../App';
 
 const routes = CLCreateBrowserRouter([
   // {
@@ -20,8 +20,8 @@ const routes = CLCreateBrowserRouter([
     children: authRoutes,
   },
   {
-    path: '/test',
-    element: <Test />
+    path: '/',
+    element: <App />
   }
 ]);
 
