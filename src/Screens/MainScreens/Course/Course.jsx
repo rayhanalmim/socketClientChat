@@ -1,41 +1,23 @@
 
-import React, { useEffect, useState } from 'react';
-import {
-  IconArchive,
-  IconArchiveOff,
-  IconEdit,
-  IconEye,
-} from '@tabler/icons-react';
-// import {
-//   CLTable, CLTableActionButton, CLTableActionButtons, CLTableBody, CLTableCell, CLTableDate, CLTableDateTimeCell, CLTableHead, CLTableHeader, CLTableImageCell, CLTableRow, CLTableTime, Header,
-// } from "@antopolis/admin-component-library/dist/elements";
-// import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
-// import { useEntityState } from "@antopolis/admin-component-library/dist/hooks";
-
+import  { useEffect } from 'react';
 import {
   CLTable,
-  CLTableActionButton,
   CLTableActionButtons,
   CLTableBody,
   CLTableCell,
-  CLTableDate,
-  CLTableDateTimeCell,
-  CLTableHead,
   CLTableHeader,
-  CLTableImageCell,
   CLTableRow,
-  CLTableTime,
   Header,
   CLTableFooter,
   Modal,
-} from '@antopolis/admin-component-library/src/Components/Elements/Elements';
-import { CardLayout } from '@antopolis/admin-component-library/src/Layouts/Layouts';
+} from '@antopolis/admin-component-library/dist/elements.cjs';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
+// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
 import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
-import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
-import { ArchiveModal } from '@antopolis/admin-component-library/src/Components/Elements/ArchiveModal/ArchiveModal';
-import { CLUseNavigate, CLUseParams } from '@antopolis/admin-component-library/src/Helpers/ReactRouterDomHelpers';
+import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements.cjs';
 import CreateCourse from './CreateCourse';
 import UpdateCourse from './UpdateCourse';
+import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
 import { COURSE_APIS } from './CourseAPIs';
 
 

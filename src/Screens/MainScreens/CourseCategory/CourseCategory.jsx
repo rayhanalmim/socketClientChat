@@ -1,56 +1,31 @@
-
-
-
-import React, { useEffect, useState } from 'react';
-import {
-  IconFolders,
-  IconArchive,
-  IconArchiveOff,
-  IconEdit,
-  IconEye,
-} from '@tabler/icons-react';
-// import {
-//   CLTable, CLTableActionButton, CLTableActionButtons, CLTableBody, CLTableCell, CLTableDate, CLTableDateTimeCell, CLTableHead, CLTableHeader, CLTableImageCell, CLTableRow, CLTableTime, Header,
-// } from "@antopolis/admin-component-library/dist/elements";
-// import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
-// import { useEntityState } from "@antopolis/admin-component-library/dist/hooks";
-
+import { useEffect } from 'react';
+import { IconFolders, } from '@tabler/icons-react';
 import {
   CLTable,
-  CLTableActionButton,
   CLTableActionButtons,
   CLTableBody,
   CLTableCell,
-  CLTableDate,
-  CLTableDateTimeCell,
-  CLTableHead,
   CLTableHeader,
-  CLTableImageCell,
   CLTableRow,
-  CLTableTime,
   Header,
   CLTableFooter,
   Modal,
   Loading,
-} from '@antopolis/admin-component-library/src/Components/Elements/Elements';
-import { CardLayout } from '@antopolis/admin-component-library/src/Layouts/Layouts';
+} from '@antopolis/admin-component-library/dist/elements.cjs';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
+// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
 import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
+import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements.cjs';
+import { CLUseNavigate } from '@antopolis/admin-component-library/dist/helper.cjs';
 import { CreateCourseCategory } from './CreateCourseCategory';
 import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
 import { COURSE_CATEGORY_APIS } from './CourseCategoryAPIS';
 import UpdateCourseCategory from './UpdateCouseCategory';
-import { ArchiveModal } from '@antopolis/admin-component-library/src/Components/Elements/ArchiveModal/ArchiveModal';
-import { CLUseNavigate } from '@antopolis/admin-component-library/src/Helpers/ReactRouterDomHelpers';
 
-const tabs = [
-  { value: 'active', label: 'Active' },
-  { value: 'archived', label: 'Archived' },
-  { value: 'invited', label: 'Invited' },
-];
 
 function CourseCategory() {
   const axiosInstance = useAxiosInstance();
-  const { data, setData, setViewModal, viewModal, setEditModal, editModal,
+  const { data, setData, setEditModal, editModal,
     inviteModal: createModal, setInviteModal: setCreateModal,
     archiveModal, setArchiveModal, filter, isLoading, setIsLoading,
     target, toggleFetch, toggle, } = useEntity();
@@ -78,8 +53,10 @@ function CourseCategory() {
 
   if (isLoading) return <Loading />
 
+  console.log(createModal)
+
   return (
-    
+
     <CardLayout>
       <Header
         heading='Course Category'

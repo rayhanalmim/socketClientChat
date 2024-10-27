@@ -1,8 +1,9 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { ShortTextInput, } from "@antopolis/admin-component-library/src/Components/Elements/Inputs/Inputs";
-import { Button } from "@antopolis/admin-component-library/src/Components/ui/button";
-import { FormWrapper } from '@antopolis/admin-component-library/src/Components/Form/Form';
+import { ShortTextInput, } from "@antopolis/admin-component-library/dist/inputs.cjs";
+import { Button } from "@antopolis/admin-component-library/dist/elements.cjs";
+
+import { FormWrapper } from '@antopolis/admin-component-library/dist/form.cjs';
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
 import { COURSE_SUB_CATEGORY_APIS } from "./CourseSubCategoryAPIS";
 

@@ -1,53 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import {
-  IconArchive,
-  IconArchiveOff,
-  IconEdit,
-  IconEye,
-} from '@tabler/icons-react';
-// import {
-//   CLTable, CLTableActionButton, CLTableActionButtons, CLTableBody, CLTableCell, CLTableDate, CLTableDateTimeCell, CLTableHead, CLTableHeader, CLTableImageCell, CLTableRow, CLTableTime, Header,
-// } from "@antopolis/admin-component-library/dist/elements";
-// import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
-// import { useEntityState } from "@antopolis/admin-component-library/dist/hooks";
-
-import {
-  CLTable,
-  CLTableActionButton,
-  CLTableActionButtons,
-  CLTableBody,
-  CLTableCell,
-  CLTableDate,
-  CLTableDateTimeCell,
-  CLTableHead,
-  CLTableHeader,
-  CLTableImageCell,
-  CLTableRow,
-  CLTableTime,
-  Header,
-  CLTableFooter,
-  Modal,
-  Loading,
-} from '@antopolis/admin-component-library/src/Components/Elements/Elements';
-import { CardLayout } from '@antopolis/admin-component-library/src/Layouts/Layouts';
+import { useEffect } from 'react';
+import { CLTable, CLTableActionButtons, CLTableBody, CLTableCell, CLTableHeader, CLTableRow, Header, CLTableFooter, Modal, Loading, } from '@antopolis/admin-component-library/dist/elements.cjs';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
+// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
 import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
 import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
-import { ArchiveModal } from '@antopolis/admin-component-library/src/Components/Elements/ArchiveModal/ArchiveModal';
-import { CLUseNavigate, CLUseParams } from '@antopolis/admin-component-library/src/Helpers/ReactRouterDomHelpers';
+import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements.cjs';
+import { CLUseParams } from '@antopolis/admin-component-library/dist/helper.cjs';
+
 import { COURSE_SUB_CATEGORY_APIS } from './CourseSubCategoryAPIS';
 import UpdateCourseSubCategory from './UpdateCourseSubCategory';
 import CreateCourseSubCategory from './CreateCourseSubCategory';
 
-const tabs = [
-  { value: 'active', label: 'Active' },
-  { value: 'archived', label: 'Archived' },
-  { value: 'invited', label: 'Invited' },
-];
+
 
 function CourseSubCategory() {
   const axiosInstance = useAxiosInstance();
-  const { data, setData, setViewModal, viewModal, setEditModal, editModal,
-    inviteModal: createModal, setInviteModal: setCreateModal,isLoading,setIsLoading
+  const { data, setData, setEditModal, editModal,
+    inviteModal: createModal, setInviteModal: setCreateModal, isLoading, setIsLoading
     ,
     archiveModal, setArchiveModal, filter,
     target, toggleFetch, toggle } = useEntity();
@@ -81,24 +50,15 @@ function CourseSubCategory() {
       <Header
         heading='Course Subcategory'
         hasSearch={false}
-        // tabs={tabs}
         openModal={setCreateModal}
         modalLabel='Create Subcategory'
         searchPlaceholder='Search Subcategory'
-        hasBackBtn = {true}
+        hasBackBtn={true}
       />
 
       <CLTable containerClassName='' tableClassName=''>
         <CLTableHeader headers={headers} hasActions={true} />
-        {/* or */}
-        {/* 
-            <CLTableHeader>
-              <CLTableHead className=''>Th1</CLTableHead>
-              <CLTableHead className=''>Th2</CLTableHead>
-              <CLTableHead className=''>Th3</CLTableHead>
-              <CLTableHead className=''>Actions</CLTableHead>
-            </CLTableHeader> 
-            */}
+
         <CLTableBody className=''>
           {
             data?.length > 0 && data.map((item, index) => (
@@ -111,7 +71,7 @@ function CourseSubCategory() {
                   target={item}
                   hasView={false}
                   extraAction
-                
+
                 />
               </CLTableRow>
             ))

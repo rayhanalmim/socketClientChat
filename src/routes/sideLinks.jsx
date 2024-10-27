@@ -2,6 +2,7 @@ import {
   IconBuildings,
   IconDashboard,
   IconTable,
+  IconCategory
 } from '@tabler/icons-react';
 
 export const links = [
@@ -13,12 +14,12 @@ export const links = [
   {
     label: 'Course',
     path: '/main/courses',
-    icon: <IconBuildings size={20} />,
+    icon: <IconTable size={20} />,
   },
   {
     label: 'Course Category',
     path: '/main/courseCategories',
-    icon: <IconTable size={20} />,
+    icon: <IconCategory size={20} />,
   },
 
 ];

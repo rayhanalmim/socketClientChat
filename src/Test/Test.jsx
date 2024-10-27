@@ -19,8 +19,9 @@ import {
   CLTableTime,
   Header,
   CLTableFooter,
-} from '@antopolis/admin-component-library/src/Components/Elements/Elements';
-import { CardLayout } from '@antopolis/admin-component-library/src/Layouts/Layouts';
+} from '@antopolis/admin-component-library/dist/elements.cjs';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
+// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
 import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
 
 const tabs = [

@@ -1,8 +1,11 @@
 import { Suspense } from 'react';
-// import Loading from '@antopolis/admin-component-library/dist/elements';
-// import { Login, Register, RecoverPassword, ForgotPassword } from '@antopolis/admin-component-library/dist/screens';
-import { Loading } from '@antopolis/admin-component-library/src/Components/Elements/Elements';
-import { Login, Register, RecoverPassword, ForgotPassword } from '@antopolis/admin-component-library/src/Screens/Screens';
+
+// import { Loading } from '@antopolis/admin-component-library/dist/elements.cjs';
+// import { Login, Register, RecoverPassword, ForgotPassword } from '@antopolis/admin-component-library/src/Screens/Screens';
+
+import { Loading } from '@antopolis/admin-component-library/dist/elements.cjs';
+import { Login, Register, RecoverPassword, ForgotPassword } from '@antopolis/admin-component-library/dist/screens.cjs';
+
 import { FORGOT_PASSWORD_API, GET_EMAIL_FROM_TOKEN_API, LOGIN_API, REGISTER_API, RESET_PASSWORD_API } from '../../APIS/AuthAPIs';
 import { axiosAuthInstance } from '../../Hooks/Instances/useAxiosPublicInstance';
 import Logo from '../../assets/logo.png';
