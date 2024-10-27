@@ -9,8 +9,11 @@ import { COURSE_CATEGORY_APIS } from "./CourseCategoryAPIS";
 export function CreateCourseCategory({
     ...props
 }) {
+
     const [isLoading, setIsLoading] = useState(false);
     const axiosInstance = useAxiosInstance()
+
+
     async function handleSubmit(data) {
         const formData = new FormData();
         formData.append("name", data.name);

@@ -19,9 +19,11 @@ import {
   CLTableTime,
   Header,
   CLTableFooter,
+  Modal,
 } from "@antopolis/admin-component-library/src/Components/Elements/Elements";
 import { CardLayout } from "@antopolis/admin-component-library/src/Layouts/Layouts";
 import { useEntity } from "@antopolis/admin-component-library/src/Hooks/Hooks";
+import { CreateOrUpdateCourseCategory } from "../Screens/MainScreens/CourseCategory/UpdateCouseCategory";
 
 // const tabs = [
 //   { value: "active", label: "Active" },
@@ -31,7 +33,7 @@ import { useEntity } from "@antopolis/admin-component-library/src/Hooks/Hooks";
 
 function Test() {
   const [modal, setModal] = React.useState(false);
-  const { data, setViewModal, viewModal } = useEntity();
+  const { data, setViewModal, viewModal, target } = useEntity();
 
   console.log("test => ", viewModal);
 
@@ -81,6 +83,14 @@ function Test() {
         </CLTableBody>
       </CLTable>
       <CLTableFooter dataLabel="Venture Data" hasPagination={false} />
+
+      <Modal
+        isOpen={viewModal}
+        onClose={() => setViewModal(false)}
+        title="Create or Update Venture"
+      >
+        <CreateOrUpdateCourseCategory id={'671d2c6be14a233f7147961e'} />
+      </Modal>
     </CardLayout>
   );
 }
