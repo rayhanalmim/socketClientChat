@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 // import {
 //   CLTable, CLTableActionButton, CLTableActionButtons, CLTableBody, CLTableCell, CLTableDate, CLTableDateTimeCell, CLTableHead, CLTableHeader, CLTableImageCell, CLTableRow, CLTableTime, Header,
 // } from "@antopolis/admin-component-library/dist/elements";
@@ -19,42 +19,40 @@ import {
   CLTableTime,
   Header,
   CLTableFooter,
-} from "@antopolis/admin-component-library/src/Components/Elements/Elements";
-import { CardLayout } from "@antopolis/admin-component-library/src/Layouts/Layouts";
-import { useEntity } from "@antopolis/admin-component-library/src/Hooks/Hooks";
+} from '@antopolis/admin-component-library/src/Components/Elements/Elements';
+import { CardLayout } from '@antopolis/admin-component-library/src/Layouts/Layouts';
+import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
 
-// const tabs = [
-//   { value: "active", label: "Active" },
-//   { value: "archived", label: "Archived" },
-//   { value: "invited", label: "Invited" },
-// ];
+const tabs = [
+  { value: 'active', label: 'Active' },
+  { value: 'archived', label: 'Archived' },
+  { value: 'invited', label: 'Invited' },
+];
 
 function Test() {
   const [modal, setModal] = React.useState(false);
   const { data, setViewModal, viewModal } = useEntity();
 
-  console.log("test => ", viewModal);
-
   const headers = [
-    { label: "", className: "min-w-32" },
-    { label: "Name", className: "min-w-32" },
-    { label: "Email", className: "min-w-36 max-lg:hidden" },
-    { label: "DateTime", className: "min-w-36 max-lg:hidden" },
-    { label: "Date", className: "min-w-36 max-lg:hidden" },
-    { label: "Time", className: "min-w-36 max-lg:hidden" },
+    { label: '', className: 'min-w-16' } ,
+    { label: 'Name', className: 'min-w-24' },
+    { label: 'Email', className: 'min-w-36 max-lg:hidden' },
+    { label: 'DateTime', className: 'min-w-36 max-lg:hidden' },
+    { label: 'Date', className: 'min-w-36 max-lg:hidden' },
+    { label: 'Time', className: 'min-w-36 max-lg:hidden' },
   ];
 
   return (
-    <CardLayout className="bg-slate-800 grid grid-flow-col auto-rows-max space-y-2">
+    <CardLayout>
       <Header
-        label="Venture Table"
+        heading='Venture Table'
         // tabs={tabs}
         openModal={setViewModal}
-        modalLabel="Venture Modal"
-        searchPlaceholder="Search Venture"
+        modalLabel='Venture Modal'
+        searchPlaceholder='Search Venture'
       />
 
-      <CLTable containerClassName="" tableClassName="">
+      <CLTable containerClassName='' tableClassName=''>
         <CLTableHeader headers={headers} hasActions={true} />
         {/* or */}
         {/* 
@@ -65,22 +63,22 @@ function Test() {
               <CLTableHead className=''>Actions</CLTableHead>
             </CLTableHeader> 
             */}
-        <CLTableBody className="">
-          <CLTableRow className="">
-            <CLTableImageCell url="" altText="" className="" />
-            <CLTableCell className="">Name</CLTableCell>
-            <CLTableCell className="" text="email@email.com" />
-            <CLTableDateTimeCell className="" date={new Date()} />
-            <CLTableDate className="" date={new Date()} />
-            <CLTableTime className="" date={new Date()} />
+        <CLTableBody className=''>
+          <CLTableRow className=''>
+            <CLTableImageCell url='' altText='' className='max-lg:hidden' />
+            <CLTableCell className=''>Name</CLTableCell>
+            <CLTableCell className='max-lg:hidden' text='email@email.com' />
+            <CLTableDateTimeCell className='max-lg:hidden' date={new Date()} />
+            <CLTableDate className='max-lg:hidden' date={new Date()} />
+            <CLTableTime className='max-lg:hidden' date={new Date()} />
             <CLTableActionButtons
               isActive={data?.isActive || true}
-              target={"MyTarget"}
+              target={'MyTarget'}
             />
           </CLTableRow>
         </CLTableBody>
       </CLTable>
-      <CLTableFooter dataLabel="Venture Data" hasPagination={false} />
+      <CLTableFooter dataLabel='Venture Data' />
     </CardLayout>
   );
 }
