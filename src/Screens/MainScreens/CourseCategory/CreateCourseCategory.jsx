@@ -7,6 +7,8 @@ import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
 import { COURSE_CATEGORY_APIS } from "./CourseCategoryAPIS";
 
 export function CreateCourseCategory({
+    setCreateModal,
+    toggleFetch,
     ...props
 }) {
 
@@ -23,6 +25,8 @@ export function CreateCourseCategory({
             const response = await axiosInstance.post(COURSE_CATEGORY_APIS, formData,);
 
             if (response.status === 200) {
+                toggleFetch();
+                setCreateModal(false);
                 console.log("Course category created successfully:", response.data);
             } else {
                 console.error("Failed to create course category:", response.data);

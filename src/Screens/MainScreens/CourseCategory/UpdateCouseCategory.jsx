@@ -6,7 +6,8 @@ import { FormWrapper } from '@antopolis/admin-component-library/src/Components/F
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
 import { COURSE_CATEGORY_APIS } from "./CourseCategoryAPIS";
 
-export function CreateOrUpdateCourseCategory({ id = null, ...props }) {
+export default function UpdateCourseCategory({ id = null, setEditModal,toggleFetch, ...props}) {
+
   const [isLoading, setIsLoading] = useState(false);
   const [defaultValues, setDefaultValues] = useState({
     name: '',
@@ -47,11 +48,11 @@ export function CreateOrUpdateCourseCategory({ id = null, ...props }) {
     try {
       setIsLoading(true);
 
-      const response = id
-        ? await axiosInstance.put(`${COURSE_CATEGORY_APIS}/${id}`, formData)
-        : await axiosInstance.post(COURSE_CATEGORY_APIS, formData);
+      const response = await axiosInstance.patch(`${COURSE_CATEGORY_APIS}/${id}`, formData)
 
       if (response.status === 200) {
+        toggleFetch();
+        setEditModal(false);
         console.log(`Course category ${id ? 'updated' : 'created'} successfully:`, response.data);
       } else {
         console.error(`Failed to ${id ? 'update' : 'create'} course category:`, response.data);
@@ -63,7 +64,7 @@ export function CreateOrUpdateCourseCategory({ id = null, ...props }) {
     }
   }
 
-  
+
 
   return (
     <FormWrapper

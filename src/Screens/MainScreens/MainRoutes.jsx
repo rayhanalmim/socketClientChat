@@ -1,6 +1,8 @@
 import Dashboard from "./Dashboard/dashboard";
 import Course from "./Course/Course";
 import CourseCategory from "./CourseCategory/CourseCategory";
+import { EntityProvider } from "@antopolis/admin-component-library/src/Hooks/Hooks";
+import CourseSubCategory from "./CourseSubCategory/CourseSubCategory";
 
 const main = 'main/';
 
@@ -11,11 +13,29 @@ const mainRoutes = [
     },
     {
         path: main + 'courses',
-        element: <Course />,
+        element: (
+            <EntityProvider>
+                <Course />
+            </EntityProvider>
+        ),
     },
     {
         path: main + 'courseCategories',
-        element: <CourseCategory />,
+        element: (
+            <EntityProvider>
+                <CourseCategory />
+            </EntityProvider>
+
+        ),
+    },
+    {
+        path: main + 'courseSubCategories/:id',
+        element: (
+            <EntityProvider>
+                <CourseSubCategory />
+            </EntityProvider>
+
+        ),
     },
 
 ];

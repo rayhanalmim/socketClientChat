@@ -1,0 +1,1 @@
+export const COURSE_SUB_CATEGORY_APIS = 'courseSubCategories/'

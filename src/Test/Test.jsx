@@ -31,7 +31,7 @@ const tabs = [
 
 function Test() {
   const [modal, setModal] = React.useState(false);
-  const { data, setViewModal, viewModal, target } = useEntity();
+  const { data, setViewModal, viewModal } = useEntity();
 
   const headers = [
     { label: '', className: 'min-w-16' } ,
@@ -77,6 +77,7 @@ function Test() {
             />
           </CLTableRow>
         </CLTableBody>
+        
       </CLTable>
       <CLTableFooter dataLabel='Venture Data' />
     </CardLayout>

@@ -1,8 +1,127 @@
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { SelectInput, ShortTextInput, } from "@antopolis/admin-component-library/src/Components/Elements/Inputs/Inputs";
+import { Button } from "@antopolis/admin-component-library/src/Components/ui/button";
+import { FormWrapper } from '@antopolis/admin-component-library/src/Components/Form/Form';
+import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
+import { COURSE_APIS } from "./CourseAPIs";
+import { COURSE_CATEGORY_APIS } from "../CourseCategory/CourseCategoryAPIS";
+import { COURSE_SUB_CATEGORY_APIS } from "../CourseSubCategory/CourseSubCategoryAPIS";
 
-function CreateCourse() {
+export default function CreateCourse({
+  setCreateModal,
+  toggleFetch,
+  ...props
+}) {
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([])
+  const [subcategories, setSubcategories] = useState([])
+  const [category, setCategory] = useState(null)
+  const [subcategory, setSubcategory] = useState(null)
+
+  const axiosInstance = useAxiosInstance()
+
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data: categoriesData } = await axiosInstance.get(`${COURSE_CATEGORY_APIS}?filter=active`);
+      setCategories(categoriesData);
+
+
+      if (category) {
+        const { data: subcategoriesData } = await axiosInstance.get(`${COURSE_SUB_CATEGORY_APIS}?filter=active&category=${category}`);
+        setSubcategories(subcategoriesData);
+      }
+    }
+    fetchData()
+  }, [category]);
+
+
+
+  async function handleSubmit(data) {
+    const formData = new FormData();
+
+    formData.append("courseName", data.courseName);
+    formData.append("platform", data.platform);
+    formData.append("category", data.category);
+    formData.append("subCategory", data.subCategory);
+
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance.post(COURSE_APIS, formData,);
+
+      if (response.status === 200) {
+        toggleFetch();
+        setCreateModal(false);
+        console.log("Course category created successfully:", response.data);
+      } else {
+        console.error("Failed to create course category:", response.data);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const handleCategoryChange = (value) => {
+    setCategory(value);
+  };
+
+  const handleSubcategoryChange = (value) => {
+    setSubcategory(value);
+  };
+
+  console.log(category)
+
   return (
-    <div>CreateCourse</div>
-  )
-}
+    <FormWrapper onSubmit={handleSubmit} {...props}>
+      <div className="grid gap-2">
+        <ShortTextInput
+          name="courseName"
+          label="Name"
+          placeholder="Enter Course name"
+          rules={{ required: "Name is required" }}
+          className="space-y-1"
+        />
 
-export default CreateCourse
+        <ShortTextInput
+          name="platform"
+          label="Platfrom"
+          placeholder="Enter Course Platform"
+          rules={{ required: "Platform is required" }}
+          className="space-y-1"
+        />
+        <SelectInput
+          name={"category"}
+          label={"Category"}
+          placeholder={"Select Category"}
+          rules={{ required: "Category is required" }}
+          options={categories?.map((item) => ({ value: item._id, label: item.name }))}
+          onChange={handleCategoryChange}
+
+        />
+
+        <SelectInput
+          name={"subCategory"}
+          label={"Select Subcategory"}
+          placeholder={"Select Subcategory"}
+          rules={{ required: "Subcategory is required" }}
+          disabled={!category}
+          options={subcategories?.map((item) => ({ value: item._id, label: item.name }))}
+          onChange={handleSubcategoryChange}
+        />
+
+
+        <Button className="mt-2" loading={isLoading}>
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Create Category"
+          )}
+        </Button>
+      </div>
+    </FormWrapper>
+  );
+}
