@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@antopolis/admin-component-library": "file:../../antopolis-admin-compotent-library",
+=======
+    "@antopolis/admin-component-library": "file:../../comp-lib/antopolis-admin-component-library",
+>>>>>>> aeb3f90dd2178243c4dcc05f07771968f39b8c0d
     "@tabler/icons-react": "^3.20.0",
     "axios": "^1.7.7",
     "react": "^18.3.1",
