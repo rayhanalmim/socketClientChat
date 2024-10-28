@@ -1,5 +1,5 @@
 
-import  { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   CLTable,
   CLTableActionButtons,
@@ -10,29 +10,25 @@ import {
   Header,
   CLTableFooter,
   Modal,
-} from '@antopolis/admin-component-library/dist/elements.cjs';
-import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
-// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
-import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
-import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements.cjs';
+} from '@antopolis/admin-component-library/dist/elements';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout';
+import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements';
 import CreateCourse from './CreateCourse';
 import UpdateCourse from './UpdateCourse';
 import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
 import { COURSE_APIS } from './CourseAPIs';
+import { useEntityState } from '@antopolis/admin-component-library/dist/hooks';
 
-
-const tabs = [
-  { value: 'active', label: 'Active' },
-  { value: 'archived', label: 'Archived' },
-  { value: 'invited', label: 'Invited' },
-];
 
 function Course() {
   const axiosInstance = useAxiosInstance();
-  const { data, setData, setViewModal, viewModal, setEditModal, editModal,
-    inviteModal: createModal, setInviteModal: setCreateModal,
-    archiveModal, setArchiveModal, filter,
-    target, toggleFetch, toggle } = useEntity();
+  const { data, setData, setFilter, setEditModal, editModal,
+    createModal, setCreateModal,
+    archiveModal, setArchiveModal,
+    filter, toggleFilter, toggleFilterValue, setToggleFilter,
+    target, setTarget, toggleFetch, toggle,
+    paginationState, setPaginationState, switchToFirstPage,
+  } = useEntityState();
 
 
   useEffect(() => {
@@ -47,6 +43,7 @@ function Course() {
     fetchData()
   }, [toggle, filter]);
 
+
   const headers = [
     { label: 'Course', className: 'min-w-24' },
     { label: 'Platform', className: 'min-w-36 max-lg:hidden' },
@@ -54,28 +51,30 @@ function Course() {
     { label: 'Subcategory', className: 'min-w-24' },
   ];
 
+  console.log(editModal)
+
   return (
     <CardLayout>
       <Header
         heading='Course'
-        hasSearch={false}
-        // tabs={tabs}
         openModal={setCreateModal}
         modalLabel='Create Course'
         searchPlaceholder='Search Course'
+        filterAndSearchProps={
+          {
+            filter,
+            setFilter,
+            hasSearch: false,
+            hasFilter: true,
+            toggleFilterValue,
+            toggleFilter,
+            setToggleFilter,
+          }
+        }
       />
 
       <CLTable containerClassName='' tableClassName=''>
         <CLTableHeader headers={headers} hasActions={true} />
-        {/* or */}
-        {/* 
-            <CLTableHeader>
-              <CLTableHead className=''>Th1</CLTableHead>
-              <CLTableHead className=''>Th2</CLTableHead>
-              <CLTableHead className=''>Th3</CLTableHead>
-              <CLTableHead className=''>Actions</CLTableHead>
-            </CLTableHeader> 
-            */}
         <CLTableBody className=''>
           {
             data?.length > 0 && data.map((item, index) => (
@@ -88,15 +87,22 @@ function Course() {
                   isActive={item.isActive || true}
                   target={item}
                   hasView={false}
-                  extraAction
+                  editBtnProps={{ setEditModal, setTarget }}
+                  archiveBtnProps={{ setArchiveModal, setTarget }}
+
                 />
               </CLTableRow>
             ))
           }
         </CLTableBody>
       </CLTable>
-      <CLTableFooter dataLabel='Course' />
-
+      <CLTableFooter
+        dataLabel='Course'
+        paginationState={paginationState}
+        paginationDispatch={setPaginationState}
+        switchToFirstPage={switchToFirstPage}
+      />
+      
       <Modal
         isOpen={createModal}
         onClose={setCreateModal}

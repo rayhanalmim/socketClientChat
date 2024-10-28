@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
-import { CLTable, CLTableActionButtons, CLTableBody, CLTableCell, CLTableHeader, CLTableRow, Header, CLTableFooter, Modal, Loading, } from '@antopolis/admin-component-library/dist/elements.cjs';
-import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
-// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
-import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
+import { CLTable, CLTableActionButtons, CLTableBody, CLTableCell, CLTableHeader, CLTableRow, Header, CLTableFooter, Modal, Loading, } from '@antopolis/admin-component-library/dist/elements';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout';
+import { useEntityState } from '@antopolis/admin-component-library/src/Hooks/Hooks';
 import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
-import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements.cjs';
-import { CLUseParams } from '@antopolis/admin-component-library/dist/helper.cjs';
+import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements';
+import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
 
 import { COURSE_SUB_CATEGORY_APIS } from './CourseSubCategoryAPIS';
 import UpdateCourseSubCategory from './UpdateCourseSubCategory';
@@ -15,11 +14,13 @@ import CreateCourseSubCategory from './CreateCourseSubCategory';
 
 function CourseSubCategory() {
   const axiosInstance = useAxiosInstance();
-  const { data, setData, setEditModal, editModal,
-    inviteModal: createModal, setInviteModal: setCreateModal, isLoading, setIsLoading
-    ,
-    archiveModal, setArchiveModal, filter,
-    target, toggleFetch, toggle } = useEntity();
+  const { data, setData, setFilter, setEditModal, editModal,
+    createModal, setCreateModal,
+    archiveModal, setArchiveModal,
+    filter, toggleFilter, toggleFilterValue, setToggleFilter,
+    target, setTarget, toggleFetch, toggle,
+    paginationState, setPaginationState, switchToFirstPage, isLoading, setIsLoading,
+  } = useEntityState();
 
   const { id: categoryId } = CLUseParams();
 
@@ -49,11 +50,21 @@ function CourseSubCategory() {
     <CardLayout >
       <Header
         heading='Course Subcategory'
-        hasSearch={false}
         openModal={setCreateModal}
         modalLabel='Create Subcategory'
         searchPlaceholder='Search Subcategory'
         hasBackBtn={true}
+        filterAndSearchProps={
+          {
+            filter,
+            setFilter,
+            hasSearch: false,
+            hasFilter: true,
+            toggleFilterValue,
+            toggleFilter,
+            setToggleFilter,
+          }
+        }
       />
 
       <CLTable containerClassName='' tableClassName=''>
@@ -70,15 +81,20 @@ function CourseSubCategory() {
                   isActive={item.isActive || true}
                   target={item}
                   hasView={false}
-                  extraAction
-
+                  editBtnProps={{ setEditModal, setTarget }}
+                  archiveBtnProps={{ setArchiveModal, setTarget }}
                 />
               </CLTableRow>
             ))
           }
         </CLTableBody>
       </CLTable>
-      <CLTableFooter dataLabel='Course Subcategory' />
+      <CLTableFooter
+        dataLabel='Course Subcategory'
+        paginationState={paginationState}
+        paginationDispatch={setPaginationState}
+        switchToFirstPage={switchToFirstPage}
+      />
 
       <Modal
         isOpen={createModal}

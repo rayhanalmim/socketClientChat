@@ -1,5 +1,5 @@
 // import { AuthContext } from '@antopolis/admin-component-library/src/Contexts/Contexts';
-import { AuthContext } from '@antopolis/admin-component-library/dist/contexts.cjs';
+import { AuthContext } from '@antopolis/admin-component-library/dist/contexts';
 import axios from 'axios';
 import { useContext, useMemo } from 'react';
 

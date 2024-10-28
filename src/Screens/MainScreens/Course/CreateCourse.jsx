@@ -1,13 +1,13 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SelectInput, ShortTextInput, } from "@antopolis/admin-component-library/dist/inputs.cjs";
-import { FormWrapper } from '@antopolis/admin-component-library/dist/form.cjs';
+import { SelectInput, ShortTextInput, } from "@antopolis/admin-component-library/dist/inputs";
+import { FormWrapper } from '@antopolis/admin-component-library/dist/form';
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
 import { COURSE_APIS } from "./CourseAPIs";
 import { COURSE_CATEGORY_APIS } from "../CourseCategory/CourseCategoryAPIS";
 import { COURSE_SUB_CATEGORY_APIS } from "../CourseSubCategory/CourseSubCategoryAPIS";
 
-import { Button } from "@antopolis/admin-component-library/dist/elements.cjs";
+import { Button } from "@antopolis/admin-component-library/dist/ui";
 
 export default function CreateCourse({
   setCreateModal,

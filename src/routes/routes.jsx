@@ -1,5 +1,5 @@
-import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/dist/helper.cjs';
-import { AuthScreen, MainScreen } from '@antopolis/admin-component-library/dist/screens.cjs'
+import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/dist/helper';
+import { AuthScreen, MainScreen } from '@antopolis/admin-component-library/dist/screens'
 
 // import { CLCreateBrowserRouter } from "@antopolis/admin-component-library/src/Helpers/Helpers";
 // import { AuthScreen, MainScreen } from "@antopolis/admin-component-library/src/Screens/Screens";

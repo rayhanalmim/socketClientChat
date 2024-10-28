@@ -11,12 +11,12 @@ import {
   CLTableFooter,
   Modal,
   Loading,
-} from '@antopolis/admin-component-library/dist/elements.cjs';
-import { CardLayout } from '@antopolis/admin-component-library/dist/layout.cjs';
-// import { useEntity } from '@antopolis/admin-component-library/dist/hooks.cjs';
-import { useEntity } from '@antopolis/admin-component-library/src/Hooks/Hooks';
-import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements.cjs';
-import { CLUseNavigate } from '@antopolis/admin-component-library/dist/helper.cjs';
+} from '@antopolis/admin-component-library/dist/elements';
+import { CardLayout } from '@antopolis/admin-component-library/dist/layout';
+// import { useEntity } from '@antopolis/admin-component-library/dist/hooks';
+import { useEntityState } from '@antopolis/admin-component-library/src/Hooks/Hooks';
+import { ArchiveModal } from '@antopolis/admin-component-library/dist/elements';
+import { CLUseNavigate } from '@antopolis/admin-component-library/dist/helper';
 import { CreateCourseCategory } from './CreateCourseCategory';
 import { useAxiosInstance } from '../../../Hooks/Instances/useAxiosInstance';
 import { COURSE_CATEGORY_APIS } from './CourseCategoryAPIS';
@@ -25,10 +25,14 @@ import UpdateCourseCategory from './UpdateCouseCategory';
 
 function CourseCategory() {
   const axiosInstance = useAxiosInstance();
-  const { data, setData, setEditModal, editModal,
-    inviteModal: createModal, setInviteModal: setCreateModal,
-    archiveModal, setArchiveModal, filter, isLoading, setIsLoading,
-    target, toggleFetch, toggle, } = useEntity();
+  const { data, setData, setFilter, setEditModal, editModal,
+    createModal, setCreateModal,
+    archiveModal, setArchiveModal,
+    filter, toggleFilter, toggleFilterValue, setToggleFilter,
+    target, setTarget, toggleFetch, toggle,
+    paginationState, setPaginationState, switchToFirstPage, isLoading, setIsLoading,
+  } = useEntityState();
+
 
   const navigate = CLUseNavigate()
 
@@ -53,31 +57,31 @@ function CourseCategory() {
 
   if (isLoading) return <Loading />
 
-  console.log(createModal)
 
   return (
 
     <CardLayout>
       <Header
         heading='Course Category'
-        hasSearch={false}
         // tabs={tabs}
         openModal={setCreateModal}
         modalLabel='Create Category'
         searchPlaceholder='Search Category'
+        filterAndSearchProps={
+          {
+            filter,
+            setFilter,
+            hasSearch: false,
+            hasFilter: true,
+            toggleFilterValue,
+            toggleFilter,
+            setToggleFilter,
+          }
+        }
       />
 
       <CLTable containerClassName='' tableClassName=''>
         <CLTableHeader headers={headers} hasActions={true} />
-        {/* or */}
-        {/* 
-            <CLTableHeader>
-              <CLTableHead className=''>Th1</CLTableHead>
-              <CLTableHead className=''>Th2</CLTableHead>
-              <CLTableHead className=''>Th3</CLTableHead>
-              <CLTableHead className=''>Actions</CLTableHead>
-            </CLTableHeader> 
-            */}
         <CLTableBody className=''>
           {
             data?.length > 0 && data.map((item, index) => (
@@ -88,6 +92,8 @@ function CourseCategory() {
                   isActive={item.isActive || true}
                   target={item}
                   hasView={false}
+                  editBtnProps={{ setEditModal, setTarget }}
+                  archiveBtnProps={{ setArchiveModal, setTarget }}
                   extraAction
                   extraActions={[
                     {
@@ -108,7 +114,12 @@ function CourseCategory() {
           }
         </CLTableBody>
       </CLTable>
-      <CLTableFooter dataLabel='Course Category' />
+      <CLTableFooter
+        dataLabel='Course Category'
+        paginationState={paginationState}
+        paginationDispatch={setPaginationState}
+        switchToFirstPage={switchToFirstPage}
+      />
 
       <Modal
         isOpen={createModal}

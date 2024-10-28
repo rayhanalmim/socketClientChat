@@ -7,10 +7,9 @@ import routes from './routes/routes'
 // import { Toaster } from '@antopolis/admin-component-library/src/Components/ui/ui'
 // import { CLRouterProvider } from '@antopolis/admin-component-library/src/Helpers/Helpers'
 
-import { ThemeProvider, AuthContextProvider } from '@antopolis/admin-component-library/dist/contexts.cjs'
-import { Toaster } from '@antopolis/admin-component-library/dist/ui.cjs'
-import { CLRouterProvider } from '@antopolis/admin-component-library/dist/helper.cjs'
-import { EntityProvider } from '@antopolis/admin-component-library/src/Hooks/Hooks'
+import { ThemeProvider, AuthContextProvider } from '@antopolis/admin-component-library/dist/contexts'
+import { Toaster } from '@antopolis/admin-component-library/dist/ui'
+import { CLRouterProvider } from '@antopolis/admin-component-library/dist/helper'
 
 import '@antopolis/admin-component-library/dist/main.css'
 
@@ -18,10 +17,8 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <AuthContextProvider>
-        <EntityProvider>
-          <CLRouterProvider router={routes} />
-          <Toaster />
-        </EntityProvider>
+        <CLRouterProvider router={routes} />
+        <Toaster />
       </AuthContextProvider>
     </ThemeProvider>
   </StrictMode>,
