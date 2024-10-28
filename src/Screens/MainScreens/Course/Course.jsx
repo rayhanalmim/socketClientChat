@@ -27,17 +27,27 @@ function Course() {
     archiveModal, setArchiveModal,
     filter, toggleFilter, toggleFilterValue, setToggleFilter,
     target, setTarget, toggleFetch, toggle,
-    paginationState, setPaginationState, switchToFirstPage,
+    paginationState, setPaginationState,
+    setTotalPages, setTotalData,
   } = useEntityState();
 
 
   useEffect(() => {
     async function fetchData() {
-      const response = await axiosInstance.get(`${COURSE_APIS}?filter=${filter} `);
-      if (response.status === 200) {
-        setData(response.data);
+      const { data: courseData, status } = await axiosInstance.get(`${COURSE_APIS}?filter=${filter}`, {
+        params: {
+          page: paginationState.currentPage,
+          limit: paginationState.limit,
+        },
+      });
+      if (status === 200) {
+        setData(courseData.data);
+        setTotalPages(courseData?.totalPages);
+        console.log(courseData)
+        setTotalData(courseData?.totalItems);
+
       } else {
-        console.error("Failed to fetch course category:", response.data);
+        console.error("Failed to fetch course category:");
       }
     }
     fetchData()
@@ -100,9 +110,8 @@ function Course() {
         dataLabel='Course'
         paginationState={paginationState}
         paginationDispatch={setPaginationState}
-        switchToFirstPage={switchToFirstPage}
       />
-      
+
       <Modal
         isOpen={createModal}
         onClose={setCreateModal}
