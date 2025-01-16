@@ -1,7 +1,10 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SelectInput, ShortTextInput, } from "@antopolis/admin-component-library/dist/inputs";
-import { FormWrapper } from '@antopolis/admin-component-library/dist/form';
+import {
+  SelectInput,
+  ShortTextInput,
+} from "@antopolis/admin-component-library/dist/inputs";
+import { FormWrapper } from "@antopolis/admin-component-library/dist/form";
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
 import { COURSE_APIS } from "./CourseAPIs";
 import { COURSE_CATEGORY_APIS } from "../CourseCategory/CourseCategoryAPIS";
@@ -14,31 +17,30 @@ export default function CreateCourse({
   toggleFetch,
   ...props
 }) {
-
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState([])
-  const [subcategories, setSubcategories] = useState([])
-  const [category, setCategory] = useState(null)
-  const [subcategory, setSubcategory] = useState(null)
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [category, setCategory] = useState(null);
+  const [subcategory, setSubcategory] = useState(null);
 
-  const axiosInstance = useAxiosInstance()
-
+  const axiosInstance = useAxiosInstance();
 
   useEffect(() => {
     async function fetchData() {
-      const { data: categoriesData } = await axiosInstance.get(`${COURSE_CATEGORY_APIS}?filter=active`);
+      const { data: categoriesData } = await axiosInstance.get(
+        `${COURSE_CATEGORY_APIS}?filter=active`
+      );
       setCategories(categoriesData);
 
-
       if (category) {
-        const { data: subcategoriesData } = await axiosInstance.get(`${COURSE_SUB_CATEGORY_APIS}?filter=active&category=${category}`);
+        const { data: subcategoriesData } = await axiosInstance.get(
+          `${COURSE_SUB_CATEGORY_APIS}?filter=active&category=${category}`
+        );
         setSubcategories(subcategoriesData);
       }
     }
-    fetchData()
+    fetchData();
   }, [category]);
-
-
 
   async function handleSubmit(data) {
     const formData = new FormData();
@@ -50,7 +52,7 @@ export default function CreateCourse({
 
     try {
       setIsLoading(true);
-      const response = await axiosInstance.post(COURSE_APIS, formData,);
+      const response = await axiosInstance.post(COURSE_APIS, formData);
 
       if (response.status === 200) {
         toggleFetch();
@@ -74,7 +76,7 @@ export default function CreateCourse({
     setSubcategory(value);
   };
 
-  console.log(category)
+  console.log(category);
 
   return (
     <FormWrapper onSubmit={handleSubmit} {...props}>
@@ -99,9 +101,11 @@ export default function CreateCourse({
           label={"Category"}
           placeholder={"Select Category"}
           rules={{ required: "Category is required" }}
-          options={categories?.map((item) => ({ value: item._id, label: item.name }))}
+          options={categories?.map((item) => ({
+            value: item._id,
+            label: item.name,
+          }))}
           onChange={handleCategoryChange}
-
         />
 
         <SelectInput
@@ -110,10 +114,12 @@ export default function CreateCourse({
           placeholder={"Select Subcategory"}
           rules={{ required: "Subcategory is required" }}
           disabled={!category}
-          options={subcategories?.map((item) => ({ value: item._id, label: item.name }))}
+          options={subcategories?.map((item) => ({
+            value: item._id,
+            label: item.name,
+          }))}
           onChange={handleSubcategoryChange}
         />
-
 
         <Button className="mt-2" loading={isLoading}>
           {isLoading ? (
