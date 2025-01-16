@@ -24,10 +24,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    // Connect to the Socket.IO server
-    const socketIo = io("http://localhost:5010"); // Change the server URL if needed
+    // Connect to the specific namespace (anthillChat)
+    const socketIo = io("http://localhost:5010/anthillChat"); // Connect to /anthillChat namespace
     setSocket(socketIo);
-    console.log("soket is runnign ", socketIo);
+    console.log("Socket is running on namespace /anthillChat", socketIo);
 
     return () => {
       socketIo.disconnect(); // Clean up on unmount
