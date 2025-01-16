@@ -27,7 +27,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     // Connect to the Socket.IO server
     const socketIo = io("http://localhost:5010"); // Change the server URL if needed
     setSocket(socketIo);
-    console.log("soket is runnign ",socketIo);
+    console.log("soket is runnign ", socketIo);
 
     return () => {
       socketIo.disconnect(); // Clean up on unmount

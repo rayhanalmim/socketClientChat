@@ -83,49 +83,28 @@ export default function CreateCourse({
       <div className="grid gap-2">
         <ShortTextInput
           name="courseName"
-          label="Name"
-          placeholder="Enter Course name"
+          label="Channel Name"
+          placeholder="Enter Channel name"
           rules={{ required: "Name is required" }}
           className="space-y-1"
         />
-
-        <ShortTextInput
-          name="platform"
-          label="Platfrom"
-          placeholder="Enter Course Platform"
-          rules={{ required: "Platform is required" }}
-          className="space-y-1"
-        />
         <SelectInput
-          name={"category"}
-          label={"Category"}
-          placeholder={"Select Category"}
-          rules={{ required: "Category is required" }}
-          options={categories?.map((item) => ({
-            value: item._id,
-            label: item.name,
-          }))}
+          name={"Type"}
+          label={"Channel Type"}
+          placeholder={"Select Channel Type"}
+          options={[
+            { value: "group", label: "Group Chat" },
+            { value: "private", label: "Private Chat" },
+          ]}
           onChange={handleCategoryChange}
-        />
-
-        <SelectInput
-          name={"subCategory"}
-          label={"Select Subcategory"}
-          placeholder={"Select Subcategory"}
-          rules={{ required: "Subcategory is required" }}
-          disabled={!category}
-          options={subcategories?.map((item) => ({
-            value: item._id,
-            label: item.name,
-          }))}
-          onChange={handleSubcategoryChange}
+          rules={{ required: "Room type is required" }}
         />
 
         <Button className="mt-2" loading={isLoading}>
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            "Create Category"
+            "Create Channel"
           )}
         </Button>
       </div>

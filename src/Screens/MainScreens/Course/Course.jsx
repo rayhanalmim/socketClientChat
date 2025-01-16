@@ -11,7 +11,6 @@ import {
   Modal,
 } from "@antopolis/admin-component-library/dist/elements";
 import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
-import { ArchiveModal } from "@antopolis/admin-component-library/dist/elements";
 import CreateCourse from "./CreateCourse";
 import UpdateCourse from "./UpdateCourse";
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
@@ -28,7 +27,6 @@ function Course() {
     editModal,
     createModal,
     setCreateModal,
-    archiveModal,
     setArchiveModal,
     filter,
     toggleFilter,
@@ -65,7 +63,7 @@ function Course() {
       }
     }
     fetchData();
-  }, [toggle, filter]);
+  }, [toggle, filter, axiosInstance, paginationState.currentPage, paginationState.limit, setData, setTotalPages, setTotalData]);
 
   const headers = [
     { label: "Course", className: "min-w-24" },
@@ -79,10 +77,10 @@ function Course() {
   return (
     <CardLayout>
       <Header
-        heading="Course"
+        heading="Channel"
         openModal={setCreateModal}
-        modalLabel="Create Course"
-        searchPlaceholder="Search Course"
+        modalLabel="Create Channel"
+        searchPlaceholder="Search Channel"
         filterAndSearchProps={{
           filter,
           setFilter,
@@ -122,7 +120,7 @@ function Course() {
       <Modal
         isOpen={createModal}
         onClose={setCreateModal}
-        title={"Create Course"}
+        title={"Create Channel"}
       >
         <CreateCourse
           setCreateModal={setCreateModal}
@@ -136,40 +134,6 @@ function Course() {
           toggleFetch={toggleFetch}
         />
       </Modal>
-      {/* {archiveModal && (
-        <ArchiveModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          item={itemToArchive}
-          toggleFetch={toggleFetch}
-          api="/api/archive" // Your API endpoint
-          customDescription="Custom description if needed"
-          successMessage="Item archived successfully"
-          requestData={{ additionalData: "value" }} // Additional request data if needed
-          isArchive={true} // Set to false if you want to unarchive
-          axiosInstance={axios} // Pass your axios instance
-          title="Archive Item"
-          method="patch" // HTTP method
-          btnText="Archive" // Custom button text
-        />
-      )} */}
-      {/* {isModalOpen && (
-        <ConformationModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          toggleFetch={toggleFetch}
-          api="/api/confirm" // Your API endpoint
-          requestData={{ additionalData: "value" }} // Additional request data if needed
-          customDescription="Are you sure you want to perform this action?"
-          successMessage="Action performed successfully"
-          failedMessage="Failed to perform action"
-          axiosInstance={axios} // Pass your axios instance
-          title="Confirm Action"
-          btnText="Confirm" // Custom button text
-          method="patch" // HTTP method
-          navigate="/success" // Path to navigate after success
-        />
-      )} */}
     </CardLayout>
   );
 }
