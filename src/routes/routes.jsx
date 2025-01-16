@@ -1,18 +1,27 @@
-import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/dist/helper';
-import { AuthScreen, MainScreen } from '@antopolis/admin-component-library/dist/screens'
-
-// import { CLCreateBrowserRouter } from "@antopolis/admin-component-library/src/Helpers/Helpers";
-// import { AuthScreen, MainScreen } from "@antopolis/admin-component-library/src/Screens/Screens";
-
-import { links } from "./sideLinks";
+import { CLCreateBrowserRouter } from "@antopolis/admin-component-library/dist/helper";
+import {
+  AuthScreen,
+  MainScreen,
+} from "@antopolis/admin-component-library/dist/screens";
+import Logo from "../assets/logo.png";
 import authRoutes from "../Screens/AuthScreens/AuthRoutes";
 import mainRoutes from "../Screens/MainScreens/MainRoutes";
-import Logo from '../assets/logo.png';
+import { links } from "./sideLinks";
 
 const routes = CLCreateBrowserRouter([
   {
-    path: '/',
-    element: <MainScreen links={links} logo={Logo} title={'Shehan Ventures'} />,
+    path: "/",
+    element: (
+      <MainScreen
+        links={links}
+        logo={Logo}
+        isRoleBased={false}
+        title={"Anthill Club"}
+        // isPermissionBased={true}
+        // isSettingsRequired={true}
+        // isSettingsRequired={false}
+      />
+    ),
     children: mainRoutes,
   },
   {
@@ -20,14 +29,6 @@ const routes = CLCreateBrowserRouter([
     element: <AuthScreen />,
     children: authRoutes,
   },
-  // {
-  //   path: "/test",
-  //   element: (
-  //     <EntityProvider>
-  //       <App />
-  //     </EntityProvider>
-  //   ),
-  // },
 ]);
 
 export default routes;

@@ -2,13 +2,12 @@ import { Suspense } from 'react';
 
 // import { Loading } from '@antopolis/admin-component-library/dist/elements';
 // import { Login, Register, RecoverPassword, ForgotPassword } from '@antopolis/admin-component-library/src/Screens/Screens';
-
-import { Loading } from '@antopolis/admin-component-library/dist/elements';
 import { Login, Register, RecoverPassword, ForgotPassword } from '@antopolis/admin-component-library/dist/screens';
 
 import { FORGOT_PASSWORD_API, GET_EMAIL_FROM_TOKEN_API, LOGIN_API, REGISTER_API, RESET_PASSWORD_API } from '../../APIS/AuthAPIs';
 import { axiosAuthInstance } from '../../Hooks/Instances/useAxiosPublicInstance';
 import Logo from '../../assets/logo.png';
+import { Loading } from '@antopolis/admin-component-library/dist/elements';
 
 const authRoutes = [
     {
@@ -19,7 +18,7 @@ const authRoutes = [
                     apiEndPoint={LOGIN_API}
                     axiosAuthInstance={axiosAuthInstance}
                     logo={Logo}
-                    title={'Login Shehan Ventures'}
+                    title={'Login Anthill'}
                 />
             </Suspense>
         ),
@@ -33,7 +32,7 @@ const authRoutes = [
                     registerApiEndPoint={REGISTER_API}
                     axiosAuthInstance={axiosAuthInstance}
                     logo={Logo}
-                    title={'Register Shehan Ventures'}
+                    title={'Register Anthill'}
                 />
             </Suspense>
         ),
@@ -46,7 +45,7 @@ const authRoutes = [
                     apiEndpoint={FORGOT_PASSWORD_API}
                     axiosAuthInstance={axiosAuthInstance}
                     logo={Logo}
-                    title={'Forgot Password Shehan Ventures'}
+                    title={'Forgot Password Anthill'}
                 />
             </Suspense>
         ),
@@ -59,7 +58,7 @@ const authRoutes = [
                     apiEndPoint={RESET_PASSWORD_API}
                     axiosAuthInstance={axiosAuthInstance}
                     logo={Logo}
-                    title={'Recover Password Shehan Ventures'}
+                    title={'Recover Password Anthill'}
                 />
             </Suspense>
         ),

@@ -1,5 +1,4 @@
 import {
-  IconBuildings,
   IconDashboard,
   IconTable,
   IconCategory
