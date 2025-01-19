@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   CLTable,
   CLTableActionButtons,
@@ -11,14 +11,15 @@ import {
   Modal,
 } from "@antopolis/admin-component-library/dist/elements";
 import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
+import { CLUseNavigate } from '@antopolis/admin-component-library/dist/helper';
 import CreateCourse from "./CreateCourse";
 import UpdateCourse from "./UpdateCourse";
-import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
-import { COURSE_APIS } from "./CourseAPIs";
+import axiosChannelInstance from "../../../Hooks/Instances/useAxiosCourseInstance";
+import { ALL_CHANNEL_API } from "./AllChannelApi";
 import { useEntityState } from "@antopolis/admin-component-library/dist/hooks";
+import { TbUsersGroup } from 'react-icons/tb';
 
 function Course() {
-  const axiosInstance = useAxiosInstance();
   const {
     data,
     setData,
@@ -35,44 +36,33 @@ function Course() {
     target,
     setTarget,
     toggleFetch,
-    toggle,
     paginationState,
     setPaginationState,
-    setTotalPages,
-    setTotalData,
   } = useEntityState();
 
+  const [toggle, setToggle] = useState(false);
+  const navigate = CLUseNavigate();
+
+  // Using useEffect with correct dependencies
   useEffect(() => {
     async function fetchData() {
-      const { data: courseData, status } = await axiosInstance.get(
-        `${COURSE_APIS}?filter=${filter}`,
-        {
-          params: {
-            page: paginationState.currentPage,
-            limit: paginationState.limit,
-          },
-        }
-      );
-      if (status === 200) {
-        setData(courseData.data);
-        setTotalPages(courseData?.totalPages);
-        console.log(courseData);
-        setTotalData(courseData?.totalItems);
-      } else {
-        console.error("Failed to fetch course category:");
+      try {
+        const response = await axiosChannelInstance.get(ALL_CHANNEL_API);
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching channels:", error);
       }
     }
-    fetchData();
-  }, [toggle, filter, axiosInstance, paginationState.currentPage, paginationState.limit, setData, setTotalPages, setTotalData]);
+      fetchData();
+  
+  }, [paginationState, setData, toggle]); // Fetch data on paginationState or setData change
 
   const headers = [
-    { label: "Course", className: "min-w-24" },
-    { label: "Platform", className: "min-w-36 max-lg:hidden" },
+    { label: "Channel", className: "min-w-24" },
+    { label: "Description", className: "min-w-36 max-lg:hidden" },
     { label: "Category", className: "min-w-24" },
-    { label: "Subcategory", className: "min-w-24" },
+    { label: "Created At", className: "min-w-24" },
   ];
-
-  console.log(editModal);
 
   return (
     <CardLayout>
@@ -97,23 +87,46 @@ function Course() {
           {data?.length > 0 &&
             data.map((item, index) => (
               <CLTableRow key={index} className="">
-                <CLTableCell className="" text={item?.courseName} />
-                <CLTableCell className="max-lg:hidden" text={item?.platform} />
-                <CLTableCell className="" text={item?.category?.name} />
-                <CLTableCell className="" text={item?.subCategory?.name} />
+                <CLTableCell className="" text={item?.name} />
+                <CLTableCell
+                  className="max-lg:hidden"
+                  text={item?.description}
+                />
+                <CLTableCell
+                  className=""
+                  text={item?.isPrivate ? "Private" : "Public"}
+                />
+                <CLTableCell className="" text={item?.createdAt} />
                 <CLTableActionButtons
                   isActive={item.isActive || true}
                   target={item}
                   hasView={false}
                   editBtnProps={{ setEditModal, setTarget }}
                   archiveBtnProps={{ setArchiveModal, setTarget }}
+                  extraAction
+                  extraActions={[
+                    {
+                      onClick: () => {
+                        navigate(`/main/project/members/${item?._id}`, {
+                          state: item,
+                        });
+                      },
+                      btnProps: {
+                        icon: TbUsersGroup,
+                        tooltipText: 'Project Members',
+                        toolTipContainerClassName:
+                          '!text-pink-300  hover:!bg-pink-300 hover:!text-white ',
+                        toolTipClassName: 'hover:!text-white ',
+                      },
+                    },
+                  ]}
                 />
               </CLTableRow>
             ))}
         </CLTableBody>
       </CLTable>
       <CLTableFooter
-        dataLabel="Course"
+        dataLabel="Channel"
         paginationState={paginationState}
         paginationDispatch={setPaginationState}
       />
@@ -124,10 +137,10 @@ function Course() {
       >
         <CreateCourse
           setCreateModal={setCreateModal}
-          toggleFetch={toggleFetch}
+          toggleFetch={setToggle}
         />
       </Modal>
-      <Modal isOpen={editModal} onClose={setEditModal} title={"Update Course"}>
+      <Modal isOpen={editModal} onClose={setEditModal} title={"Update Channel"}>
         <UpdateCourse
           setEditModal={setEditModal}
           id={target?._id}

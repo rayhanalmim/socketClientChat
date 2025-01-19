@@ -1,1 +1,1 @@
-export const COURSE_APIS = 'courses/'
+export const COURSE_APIS = 'createChannel/'

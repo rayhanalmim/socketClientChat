@@ -10,8 +10,8 @@ import {
   IconPaperclip,
 } from "@tabler/icons-react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
-import { cn } from "@antopolis/admin-component-library/dist/form-B8zjCsro"; // Import useSocket hook
-import { useSocket } from "../../../Context/SocketContext";
+import { cn } from "@antopolis/admin-component-library/dist/form-B8zjCsro";
+import { io } from "socket.io-client";
 
 const channels = [
   {
@@ -41,60 +41,82 @@ const channels = [
 ];
 
 export default function Chat() {
-  const socket = useSocket(); // Access Socket.IO instance
+  const [socket, setSocket] = useState(null);
   const [search, setSearch] = useState("");
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [selectedChannel, setSelectedChannel] = useState(channels[0]); // Default to first channel
 
-  // Join the selected channel when the component mounts
+  // Initialize socket on mount
   useEffect(() => {
-    if (!socket || !selectedChannel) return;
+    const socketIo = io("http://localhost:5010/anthillChat");
 
-    console.log(selectedChannel)
-
-    // Join the selected channel using channelId
-    socket.emit("join_channel", { channelId: selectedChannel._id });
-
-    // Listen for incoming messages
-    socket.on("receive_message", (data) => {
-      console.log("Received message: ", data);
-      setMessages((prev) => [...prev, data]);
+    socketIo.on("connect", () => {
+      console.log("Connected to socket:", socketIo.id);
     });
 
-    // Fetch initial message history
-    socket.emit("get_message_history", { channelId: selectedChannel._id }, (messages) => {
-      setMessages(messages); // Populate initial messages
-    });
+    setSocket(socketIo);
 
     return () => {
-      socket.off("receive_message"); // Cleanup listener
+      console.log("Disconnecting socket...");
+      socketIo.disconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    if (socket && selectedChannel) {
+      console.log("Joining channel:", selectedChannel.name);
+
+      socket.emit("join_channel", { channelId: selectedChannel._id });
+
+      // Listen for incoming messages
+      socket.on("receive_message", (data) => {
+        console.log("Message received:", data);
+        setMessages((prev) => [...prev, data]);
+      });
+
+      // Fetch initial message history
+      socket.emit(
+        "get_message_history",
+        { channelId: selectedChannel._id },
+        (messages) => {
+          console.log("Fetched message history:", messages);
+          setMessages(messages || []);
+        }
+      );
+
+      return () => {
+        console.log("Leaving channel:", selectedChannel.name);
+        socket.off("receive_message");
+      };
+    }
   }, [socket, selectedChannel]);
 
-  // Handle message send
   const sendMessage = (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
 
     const messageData = {
-      channelId: selectedChannel._id, // Use selected channel ID
+      channelId: selectedChannel._id,
       content: newMessage,
       messageType: "text",
       attachments: [],
+      timestamp: new Date().toISOString(),
     };
 
-    socket.emit("send_message", messageData); // Send message to selected channel
+    console.log("Sending message:", messageData);
+
+    socket.emit("send_message", messageData);
     setMessages((prev) => [
       ...prev,
-      { userId: "You", message: newMessage, timestamp: new Date() },
-    ]); // Add own message to UI
-    setNewMessage(""); // Clear input
+      { userId: "You", message: newMessage, timestamp: new Date().toISOString() },
+    ]);
+    setNewMessage("");
   };
 
   return (
     <section className="flex h-full p-5 gap-6">
-      {/* Left Sidebar */}
+      {/* Sidebar */}
       <div className="flex flex-col gap-2 w-1/4">
         <div className="sticky top-0 z-10 bg-background px-4 pb-3 shadow-md">
           <div className="flex items-center justify-between py-2">
@@ -121,7 +143,11 @@ export default function Chat() {
           {channels.map((channel) => (
             <Button
               key={channel._id}
-              className={`w-full text-left p-2 ${selectedChannel._id === channel._id ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}
+              className={`w-full text-left p-2 ${
+                selectedChannel._id === channel._id
+                  ? "bg-primary text-white"
+                  : "bg-secondary text-muted-foreground"
+              }`}
               onClick={() => setSelectedChannel(channel)}
             >
               {channel.name}
@@ -130,9 +156,8 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Right Chat Panel */}
+      {/* Chat Panel */}
       <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
-        {/* Chat Header */}
         <div className="mb-1 flex justify-between bg-secondary p-4 shadow-lg">
           <div className="flex gap-3">
             <Button size="icon" variant="ghost" className="-ml-2">
@@ -147,7 +172,6 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* Chat Messages */}
         <div className="flex flex-col flex-1 overflow-y-auto p-4">
           {messages.map((msg, index) => (
             <div
@@ -159,17 +183,14 @@ export default function Chat() {
                   : "self-start rounded-[16px_16px_16px_0] bg-secondary"
               )}
             >
-              {msg.message}
-              <span
-                className="block mt-1 text-xs font-light text-muted-foreground"
-              >
-                {format(new Date(msg.timestamp), "h:mm a")}
+              {msg.message || "No message content"}
+              <span className="block mt-1 text-xs font-light text-muted-foreground">
+                {msg.timestamp ? format(new Date(msg.timestamp), "h:mm a") : "Invalid time"}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Chat Input */}
         <form className="flex gap-2 p-4" onSubmit={sendMessage}>
           <div className="flex flex-1 items-center gap-2 rounded-md border px-2 py-1">
             <div className="space-x-1">

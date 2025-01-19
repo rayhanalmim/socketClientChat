@@ -1,0 +1,26 @@
+const channels = [
+    {
+      _id: "6788ecc30d254c105e3b3357",
+      name: "General",
+      description: "The main channel for discussions and announcements.",
+      isPrivate: false,
+    },
+    {
+      _id: "6788ecc30d254c105e3b3358",
+      name: "Private Discussions",
+      description: "A private space for internal team discussions.",
+      isPrivate: true,
+    },
+    {
+      _id: "6788ecc30d254c105e3b3359",
+      name: "Random Chat",
+      description: "For random conversations and memes.",
+      isPrivate: false,
+    },
+    {
+      _id: "6788ecc30d254c105e3b335a",
+      name: "Support",
+      description: "A channel for users to get help and support.",
+      isPrivate: false,
+    },
+  ];

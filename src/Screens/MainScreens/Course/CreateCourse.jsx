@@ -1,102 +1,70 @@
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   SelectInput,
   ShortTextInput,
+  TextAreaInput,
 } from "@antopolis/admin-component-library/dist/inputs";
 import { FormWrapper } from "@antopolis/admin-component-library/dist/form";
-import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
+import axiosChannelInstance from "../../../Hooks/Instances/useAxiosCourseInstance";
 import { COURSE_APIS } from "./CourseAPIs";
-import { COURSE_CATEGORY_APIS } from "../CourseCategory/CourseCategoryAPIS";
-import { COURSE_SUB_CATEGORY_APIS } from "../CourseSubCategory/CourseSubCategoryAPIS";
 
 import { Button } from "@antopolis/admin-component-library/dist/ui";
 
-export default function CreateCourse({
-  setCreateModal,
-  toggleFetch,
-  ...props
-}) {
+// eslint-disable-next-line react/prop-types
+export default function CreateCourse({ setCreateModal, toggleFetch, ...props }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [category, setCategory] = useState(null);
-  const [subcategory, setSubcategory] = useState(null);
-
-  const axiosInstance = useAxiosInstance();
-
-  useEffect(() => {
-    async function fetchData() {
-      const { data: categoriesData } = await axiosInstance.get(
-        `${COURSE_CATEGORY_APIS}?filter=active`
-      );
-      setCategories(categoriesData);
-
-      if (category) {
-        const { data: subcategoriesData } = await axiosInstance.get(
-          `${COURSE_SUB_CATEGORY_APIS}?filter=active&category=${category}`
-        );
-        setSubcategories(subcategoriesData);
-      }
-    }
-    fetchData();
-  }, [category]);
 
   async function handleSubmit(data) {
-    const formData = new FormData();
-
-    formData.append("courseName", data.courseName);
-    formData.append("platform", data.platform);
-    formData.append("category", data.category);
-    formData.append("subCategory", data.subCategory);
+    console.log('data', data);
 
     try {
       setIsLoading(true);
-      const response = await axiosInstance.post(COURSE_APIS, formData);
+      toggleFetch(false);
 
-      if (response.status === 200) {
-        toggleFetch();
-        setCreateModal(false);
-        console.log("Course category created successfully:", response.data);
+      const response = await axiosChannelInstance.post(COURSE_APIS, data);
+
+      if (response.status === 201) {
+        console.log("Channel created successfully:", response.data);
+        toggleFetch(true); // Refetch the data after successful creation
+        setCreateModal(false); // Close the modal
       } else {
-        console.error("Failed to create course category:", response.data);
+        console.error("Failed to create channel:", response.data);
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Error during channel creation:", error);
     } finally {
       setIsLoading(false);
     }
   }
 
-  const handleCategoryChange = (value) => {
-    setCategory(value);
-  };
-
-  const handleSubcategoryChange = (value) => {
-    setSubcategory(value);
-  };
-
-  console.log(category);
-
   return (
     <FormWrapper onSubmit={handleSubmit} {...props}>
       <div className="grid gap-2">
         <ShortTextInput
-          name="courseName"
+          name="name"
           label="Channel Name"
           placeholder="Enter Channel name"
           rules={{ required: "Name is required" }}
           className="space-y-1"
         />
+
+        <TextAreaInput
+          name="description"
+          label="Channel Description"
+          placeholder="Enter Channel Description"
+          rules={{ required: "Channel Description is required" }}
+          className="space-y-1"
+        />
+
         <SelectInput
-          name={"Type"}
-          label={"Channel Type"}
-          placeholder={"Select Channel Type"}
+          name="isPrivate"
+          label="Channel Category"
+          placeholder="Select Channel Category"
           options={[
-            { value: "group", label: "Group Chat" },
-            { value: "private", label: "Private Chat" },
+            { value: false, label: "Public Chat" },
+            { value: true, label: "Private Chat" },
           ]}
-          onChange={handleCategoryChange}
           rules={{ required: "Room type is required" }}
         />
 

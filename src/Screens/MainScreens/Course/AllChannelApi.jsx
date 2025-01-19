@@ -1,0 +1,1 @@
+export const ALL_CHANNEL_API = 'channels/'
