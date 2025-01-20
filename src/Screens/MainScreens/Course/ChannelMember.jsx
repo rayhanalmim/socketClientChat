@@ -19,20 +19,17 @@ import {
 
   import {
     CMS_USER_API,
-    IMAGE_URL,
-    PROJECT_MEMBERS_API,
-    PROJECTS_API,
+
   } from '../Course/Utils/Apis';
   
   import DataLoader from '../Course/Utils/Dataloader/DataLoader';
   import InviteProjectMemberModal from './inviteProjectMember';
 import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
-  
-  const CHANNEL_MEMBERS_API = 'http://localhost:5010/api/channel/getChannelMember/678ca40ba95404fd372459e2';
+
   
   function ProjectMembers() {
     const { id } = CLUseParams();
-    const [inviteModalOpen, setInviteModalOpen] = useState(false);
+
     const {
       data,
       setData,
@@ -77,7 +74,7 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
           console.log(id)
   
           // Fetch data from the hardcoded API
-          const response = await axios.get(`http://localhost:5010/api/channel/getChannelMember/${id}`);
+          const response = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/channel/getChannelMember/${id}`);
 
           console.log(response.data.data)
           if (response.status === 200) {
@@ -161,7 +158,7 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
             item={target?.cmsUser}
             toggleFetch={toggleFetch}
             api={`${CMS_USER_API}archiveCmsUser/${target?.cmsUser?._id}`}
-            axiosInstance={axiosInstance}
+            // axiosInstance={axiosInstance}
             successMessage={`${target?.cmsUser?.name} has been archived`}
             isArchive={target?.isActive}
             title={target?.cmsUser?.name}

@@ -52,7 +52,7 @@ export default function InviteProjectMemberModal({ onClose, toggleFetch, id }) {
       try {
         setLoadingMembers(true);
         const response = await axios.get(
-          "http://localhost:5010/api/employeeApp/search",
+          `${import.meta.env.VITE_APP_BACKEND_URL}api/employeeApp/search`,
           {
             params: { search: searchTerm },
           }
@@ -96,7 +96,7 @@ export default function InviteProjectMemberModal({ onClose, toggleFetch, id }) {
 
       console.log(payload);
 
-        const response = await axios.post("http://localhost:5010/api/channel/addChannelMember", payload);
+        const response = await axios.post(`${import.meta.env.VITE_APP_BACKEND_URL}api/channel/addChannelMember`, payload);
 
         if (response.data) {
           toast.success('Invitation sent successfully', { id: toastId });

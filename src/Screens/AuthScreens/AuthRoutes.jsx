@@ -18,7 +18,7 @@ const authRoutes = [
                     apiEndPoint={LOGIN_API}
                     axiosAuthInstance={axiosAuthInstance}
                     logo={Logo}
-                    title={'Login Anthill'}
+                    title={'Ant Chat'}
                 />
             </Suspense>
         ),
