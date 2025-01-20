@@ -29,6 +29,7 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
   
   function ProjectMembers() {
     const { id } = CLUseParams();
+    const [onClose, setOnClose] = useState(false);
 
     const {
       data,
@@ -93,7 +94,7 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
       }
   
       fetchData();
-    }, [toggle, filter]);
+    }, [toggle, filter, onClose]);
   
     return isLoading ? (
       <DataLoader />
@@ -148,7 +149,8 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
           onClose={setCreateModal}
           title="Invite Member"
         >
-          <InviteProjectMemberModal toggleFetch={toggleFetch} id={id} />
+          
+          <InviteProjectMemberModal onClose={setOnClose} setCreateModal={setCreateModal}  id={id} />
         </Modal>
   
         {archiveModal && (

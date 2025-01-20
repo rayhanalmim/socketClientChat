@@ -6,10 +6,9 @@ import { useState, useEffect } from "react";
 import axiosChannelInstance from "../../../Hooks/Instances/useAxiosCourseInstance";
 import { toast } from "sonner";
 import Select from "react-select";
-import { CMS_USER_API, PROJECT_MEMBERS_API } from "../Course/Utils/Apis";
 import axios from "axios";
 
-export default function InviteProjectMemberModal({ onClose, toggleFetch, id }) {
+export default function InviteProjectMemberModal({ onClose, id, setCreateModal }) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
   const [projects, setProjects] = useState([]);
@@ -88,6 +87,7 @@ export default function InviteProjectMemberModal({ onClose, toggleFetch, id }) {
 
     try {
       setIsLoading(true);
+      onClose(false);
       const payload = {
         ...data,
         channelId: id,
@@ -100,8 +100,9 @@ export default function InviteProjectMemberModal({ onClose, toggleFetch, id }) {
 
         if (response.data) {
           toast.success('Invitation sent successfully', { id: toastId });
-          toggleFetch();
-          onClose();
+          setCreateModal(false);
+         
+          onClose(true);
         }
     } catch (error) {
       toast.error(
