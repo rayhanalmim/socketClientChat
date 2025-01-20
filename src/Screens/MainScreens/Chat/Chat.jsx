@@ -133,6 +133,7 @@ export default function Chat() {
         socket.off("stop_typing", stopTypingListener);
       };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, selectedChannel]); // Dependencies for reinitializing listeners
 
   useEffect(() => {

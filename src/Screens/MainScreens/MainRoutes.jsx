@@ -1,4 +1,4 @@
-import Dashboard from "./Dashboard/dashboard";
+import Dashboard from "./Dashboard/Dashboard";
 import Course from "./Course/Course";
 import CourseCategory from "./CourseCategory/CourseCategory";
 import CourseSubCategory from "./CourseSubCategory/CourseSubCategory";
