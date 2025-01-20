@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react"; // Added useRef
 import axios from "axios";
 import { format } from "date-fns";
@@ -24,17 +23,16 @@ export default function Chat() {
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null); // Default to no channel
   const messagesEndRef = useRef(null); // Ref to scroll to the bottom when new messages come
-  const typingTimeoutRef = useRef(null); // Ref to manage the typing timeout
-  const [isTyping, setIsTyping] = useState(false); // Track if typing is already active
 
   const [typingUsers, setTypingUsers] = useState([]); // Store typing users
+  const typingTimeoutRef = useRef(null); // Store the typing timeout
 
   // Fetch channels from the API
   useEffect(() => {
     const fetchChannels = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.1.13:5010/api/channel/channels"
+          "http://localhost:5010/api/channel/channels"
         );
         setChannels(response.data); // Assuming API returns an array of channels
         setSelectedChannel(response.data[0]); // Set the first channel as default
@@ -48,7 +46,7 @@ export default function Chat() {
 
   // Initialize socket on mount
   useEffect(() => {
-    const socketIo = io("http://192.168.1.13:5010/anthillChat");
+    const socketIo = io("http://localhost:5010/anthillChat");
 
     socketIo.on("connect", () => {
       console.log("Connected to socket:", socketIo.id);
@@ -66,29 +64,29 @@ export default function Chat() {
     if (socket && selectedChannel) {
       const member = JSON.parse(localStorage.getItem("member"));
       const userId = member?._id;
-
+  
       // First leave the previous channel
       socket.emit("leave_channel", { channelId: selectedChannel._id, userId });
-
+  
       // Join the new channel after leaving the old one
       socket.emit("join_channel", { channelId: selectedChannel._id, userId });
-
+  
       // Listener for error events
       const errorListener = (errorMessage) => {
         console.log("Error:", errorMessage);
         alert(`Error: ${errorMessage}`); // You can show a custom error message or alert here
       };
-
+  
       // Listener for message history
       const messageHistoryListener = (data) => {
         console.log("Message history received:", data);
         setMessages(data.reverse()); // Reverse the messages so the latest appears at the bottom
       };
-
+  
       // Listener for new messages
       const messageListener = (data) => {
         console.log("Message received:", data);
-
+  
         setMessages((prev) => {
           // Only add the message if it is from a different sender than the last one
           if (userId === data.senderId) {
@@ -96,33 +94,33 @@ export default function Chat() {
           }
           return [...prev, data]; // Add the new message
         });
-
+  
         // Log after the state update to capture the updated state correctly
         setTimeout(() => {
           console.log("from message listener", messages);
         }, 0); // Ensure it logs after the next render cycle
       };
-
+  
       // Listener for typing events
       const typingListener = ({ userId, name }) => {
         setTypingUsers((prev) => [...prev, { userId, name }]);
       };
-
+  
       // Listener for stop typing events
       const stopTypingListener = ({ userId }) => {
         setTypingUsers((prev) => prev.filter((user) => user.userId !== userId));
       };
-
+  
       // Register all listeners
       socket.on("error", errorListener);
       socket.on("message_history", messageHistoryListener);
       socket.on("receive_message", messageListener);
       socket.on("typing", typingListener);
       socket.on("stop_typing", stopTypingListener);
-
+  
       return () => {
         console.log("Cleanup for channel:", selectedChannel.name);
-
+  
         // Remove all listeners to prevent memory leaks
         socket.off("error", errorListener);
         socket.off("message_history", messageHistoryListener);
@@ -132,6 +130,7 @@ export default function Chat() {
       };
     }
   }, [socket, selectedChannel]); // Dependencies for reinitializing listeners
+  
 
   useEffect(() => {
     // Scroll to the bottom when messages are updated
@@ -139,6 +138,8 @@ export default function Chat() {
   }, [messages]);
 
   console.log("here is the messages", messages);
+
+  
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -175,28 +176,22 @@ export default function Chat() {
     setNewMessage("");
   };
 
-  const handleTyping = (e) => {
-    if (socket && selectedChannel) {
-      const member = JSON.parse(localStorage.getItem("member"));
-      const userId = member?._id;
+  // Typing handler function
+  const handleTyping = () => {
+    console.log("user in typing");
 
-      // Emit "typing" event only if not already typing
-      if (!isTyping) {
-        setIsTyping(true);
-        socket.emit("typing", { channelId: selectedChannel._id, userId });
-      }
+    const member = JSON.parse(localStorage.getItem("member"));
+    const userId = member?._id;
 
-      // Clear any existing timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
+    // Emit 'typing' event when the user starts typing
+    socket.emit("typing", { channelId: selectedChannel._id, userId });
 
-      // Set a new timeout for detecting typing stop
-      typingTimeoutRef.current = setTimeout(() => {
-        setIsTyping(false); // Reset typing status
-        socket.emit("stop_typing", { channelId: selectedChannel._id, userId });
-      }, 1000); // 1 second after the last key press
-    }
+    console.log("after boardcast typing");
+    // Reset the timeout to stop emitting 'typing' after a delay
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("stop_typing", { channelId: selectedChannel._id, userId });
+    }, 1000); // Stop typing after 1 second of inactivity
   };
 
   console.log("typingUsers", typingUsers);
@@ -261,7 +256,7 @@ export default function Chat() {
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-1">
+        <div className="flex flex-col flex-1 overflow-y-auto p-4 gap-2">
           {messages.map((msg, index) => {
             // Skip rendering messages with empty content
             if (!msg?.content.trim()) return null; // Skip empty messages
@@ -273,7 +268,7 @@ export default function Chat() {
                   msg.senderId ===
                     JSON.parse(localStorage.getItem("member"))?._id
                     ? "self-end rounded-[16px_16px_0_16px] bg-primary/85 text-white"
-                    : "self-start rounded-[16px_16px_16px_0] bg-primary/85 text-white"
+                    : "self-start rounded-[16px_16px_16px_0] bg-secondary"
                 )}
               >
                 <div className="font-semibold text-red-300">
@@ -302,14 +297,11 @@ export default function Chat() {
             );
           })}
 
-          <div className="my-1">
+          <div>
             {typingUsers.length > 0 && (
-              <p className="text-gray-500 text-sm italic my-1">
-                {typingUsers.map((user, index) => (
-                  <span key={user.userId}>
-                    {user.name} is typing
-                    {index === typingUsers.length - 1 ? "..." : ","}{" "}
-                  </span>
+              <p>
+                {typingUsers.map((user) => (
+                  <span key={user.userId}>{user.name} is typing...</span>
                 ))}
               </p>
             )}
@@ -337,10 +329,8 @@ export default function Chat() {
               placeholder="Type your message..."
               className="flex-1 bg-inherit"
               value={newMessage}
-              onChange={(e) => {
-                setNewMessage(e.target.value); // Update message state
-                handleTyping(e); // Trigger typing event on every input change
-              }} // Detect typing when input is focused
+              onChange={(e) => setNewMessage(e.target.value)}
+              onFocus={handleTyping} // Detect typing when input is focused
             />
             <Button type="submit" size="icon" variant="ghost">
               <IconSend size={20} />
