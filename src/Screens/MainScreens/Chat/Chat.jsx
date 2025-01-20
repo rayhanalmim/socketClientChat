@@ -14,7 +14,8 @@ import {
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { cn } from "@antopolis/admin-component-library/dist/form-B8zjCsro";
 import { io } from "socket.io-client";
-import { useDebounce } from "../../../Hooks/useDebounce"; // Imported useDebounce hook
+
+
 
 export default function Chat() {
   const [socket, setSocket] = useState(null);
@@ -34,8 +35,9 @@ export default function Chat() {
     const fetchChannels = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.1.13:5010/api/channel/channels"
+          import.meta.env.VITE_APP_BACKEND_URL + "api/channel/channels"
         );
+        console.log(response.data)
         setChannels(response.data); // Assuming API returns an array of channels
         setSelectedChannel(response.data[0]); // Set the first channel as default
       } catch (error) {
@@ -48,7 +50,7 @@ export default function Chat() {
 
   // Initialize socket on mount
   useEffect(() => {
-    const socketIo = io("http://192.168.1.13:5010/anthillChat");
+    const socketIo = io(`${import.meta.env.VITE_APP_BACKEND_URL}anthillChat`);
 
     socketIo.on("connect", () => {
       console.log("Connected to socket:", socketIo.id);
