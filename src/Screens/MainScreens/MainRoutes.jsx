@@ -3,7 +3,7 @@ import Course from "./Course/Course";
 import CourseCategory from "./CourseCategory/CourseCategory";
 import CourseSubCategory from "./CourseSubCategory/CourseSubCategory";
 import Chat from "./Chat/Chat";
-import { SocketProvider } from "../../Context/SocketContext";
+// import { SocketProvider } from "../../Context/SocketContext";
 import ProjectMembers from "./Course/ChannelMember";
 
 const main = "main/";
@@ -20,9 +20,7 @@ const mainRoutes = [
   {
     path: main + "chat",
     element: (
-      <SocketProvider>
         <Chat />
-      </SocketProvider>
     ),
   },
   {
