@@ -13,291 +13,72 @@ import {
 } from "@tabler/icons-react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { cn } from "@antopolis/admin-component-library/dist/form-B8zjCsro";
-import { io } from "socket.io-client";
+import useFetchChannelsAndEmployees from "./Hooks/useFetchChannelsAndEmployees";
+import useSocket from "./Hooks/useSocket";
+import useChatListeners from "./Hooks/useChatListeners";
+import sendMessage from "./utils/sendMessage"; 
+import { handleTyping } from "./utils/handleTyping"; 
+import { handleSelectChannel } from "./utils/handleSelectChannel";
 
 export default function Chat() {
-  const [socket, setSocket] = useState(null);
   const [search, setSearch] = useState("");
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [channels, setChannels] = useState([]);
-  const [selectedChannel, setSelectedChannel] = useState(null); // Default to no channel
-  const messagesEndRef = useRef(null); // Ref to scroll to the bottom when new messages come
-  const typingTimeoutRef = useRef(null); // Ref to manage the typing timeout
-  const [isTyping, setIsTyping] = useState(false); // Track if typing is already active
-  const [employees, setEmployees] = useState([]);
-  const [currentUser, setcurrentUser] = useState(null);
+  const messagesEndRef = useRef(null); 
+  const typingTimeoutRef = useRef(null); 
+  const [isTyping, setIsTyping] = useState(false); 
   const [conversationId, setConversationId] = useState(null);
 
-  const [typingUsers, setTypingUsers] = useState([]); // Store typing users
+  const [typingUsers, setTypingUsers] = useState([]); 
+  const socket = useSocket();
+
+  const {
+    currentUser,
+    employees,
+    channels,
+    selectedChannel,
+    setSelectedChannel,
+  } = useFetchChannelsAndEmployees();
+
+  useChatListeners({
+    socket,
+    selectedChannel,
+    setMessages,
+    setTypingUsers,
+  });
+
 
   useEffect(() => {
-    const fetchChannelsAndEmployee = async () => {
-      try {
-        const member = JSON.parse(localStorage.getItem("member"));
-        const userId = member?._id;
-        setcurrentUser(member);
-
-        if (!userId) {
-          console.error("User ID not found in localStorage");
-          return;
-        }
-
-        const response = await axios.get(
-          `${
-            import.meta.env.VITE_APP_BACKEND_URL
-          }api/channel/getDmUser/${userId}`
-        );
-
-        const responseEmployee = await axios.get(
-          `${
-            import.meta.env.VITE_APP_BACKEND_URL
-          }api/employeeApp/getAllEmployees/${userId}`
-        );
-        setEmployees(responseEmployee.data);
-
-        console.log(response.data);
-        setChannels(response.data); // Assuming API returns an array of channels
-        setSelectedChannel(response.data[0]); // Set the first channel as default
-      } catch (error) {
-        console.error("Error fetching channels:", error);
-      }
-    };
-
-    fetchChannelsAndEmployee();
-  }, []);
-
-  // Initialize socket on mount
-  useEffect(() => {
-    const socketIo = io(`${import.meta.env.VITE_APP_BACKEND_URL}anthillChat`);
-
-    socketIo.on("connect", () => {
-      console.log("Connected to socket:", socketIo.id);
-    });
-
-    setSocket(socketIo);
-
-    return () => {
-      console.log("Disconnecting socket...");
-      socketIo.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (socket && selectedChannel) {
-      const member = JSON.parse(localStorage.getItem("member"));
-      const userId = member?._id;
-
-      // New message listener
-      const dmMessegeListener = (data) => {
-        console.log("Message received:", data);
-        setMessages((prev) => {
-          if (userId === data.senderId) {
-            return prev; // Ignore messages sent by the same user
-          }
-          return [...prev, data];
-        });
-      };
-
-      console.log(
-        "selectedChannel.conversationId",
-        selectedChannel.conversationId
-      );
-
-      if (selectedChannel.conversationId) {
-        // Direct Message logic
-
-        // Leave the previous channel
-        if (selectedChannel._id) {
-          socket.emit("leave_channel", {
-            channelId: selectedChannel._id,
-            userId,
-          });
-        }
-
-        const [senderId, recipientId] =
-          selectedChannel.conversationId.split("_");
-
-        console.log("reciption id", recipientId);
-
-        socket.emit("join_dm", {
-          conversationId: selectedChannel.conversationId,
-        });
-
-        socket.on("private_message_history", (data) => {
-          setMessages(data.reverse());
-        });
-
-        socket.on("recived_dm", dmMessegeListener);
-      } else {
-        // Leave the previous channel
-        if (selectedChannel._id) {
-          socket.emit("leave_channel", {
-            channelId: selectedChannel._id,
-            userId,
-          });
-        }
-
-        // Join the new channel
-        socket.emit("join_channel", { channelId: selectedChannel._id, userId });
-      }
-
-      // Error handling
-      const errorListener = (errorMessage) => {
-        console.error("Error:", errorMessage);
-        alert(`Error: ${errorMessage}`);
-      };
-
-      // Message history listener
-      const messageHistoryListener = (data) => {
-        console.log("Message history received:", data);
-        setMessages(data.reverse());
-      };
-
-      // New message listener
-      const messageListener = (data) => {
-        console.log("Message received:", data);
-        setMessages((prev) => {
-          if (userId === data.senderId) {
-            return prev; // Ignore messages sent by the same user
-          }
-          return [...prev, data];
-        });
-      };
-
-      // Typing indicator listeners
-      const typingListener = ({ userId, name }) => {
-        setTypingUsers((prev) => [...prev, { userId, name }]);
-        console.log(
-          "typing indecator trigger form the dm......................................xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        );
-      };
-
-      const stopTypingListener = ({ userId }) => {
-        setTypingUsers((prev) => prev.filter((user) => user.userId !== userId));
-      };
-
-      // Register all listeners
-      socket.on("error", errorListener);
-      socket.on("message_history", messageHistoryListener);
-      socket.on("receive_message", messageListener);
-      socket.on("typing", typingListener);
-      socket.on("stop_typing", stopTypingListener);
-
-      return () => {
-        console.log("Cleanup for channel:", selectedChannel.name);
-
-        // Remove listeners to avoid memory leaks
-        socket.off("private_message_history");
-        socket.off("send_dm", dmMessegeListener);
-        socket.off("recived_dm");
-        socket.off("error", errorListener);
-        socket.off("message_history", messageHistoryListener);
-        socket.off("receive_message", messageListener);
-        socket.off("typing", typingListener);
-        socket.off("stop_typing", stopTypingListener);
-      };
-    }
-  }, [socket, selectedChannel]);
-  // Dependencies for reinitializing listeners
-
-  useEffect(() => {
-    // Scroll to the bottom when messages are updated
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  console.log("here is the messages", messages);
-
-  const sendMessage = (e) => {
+  const sendMessageHandler = (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !socket) return; // Prevent sending empty messages
-    const member = JSON.parse(localStorage.getItem("member"));
-    const userId = member?._id;
-
-    if (selectedChannel.conversationId) {
-      // Send DM
-      const recipientId = selectedChannel.employeeId;
-      if (!recipientId) {
-        console.error("Recipient ID could not be determined.");
-        return;
-      }
-
-      console.log("sender id, reciver id", userId, recipientId);
-
-      socket.emit("send_dm", {
-        senderId: userId,
-        recipientId,
-        content: newMessage.trim(),
-      });
-
-      console.log("dm triggered ");
-    } else {
-      // Send Channel Message
-      socket.emit("send_message", {
-        channelId: selectedChannel._id,
-        content: newMessage.trim(),
-        userId,
-        messageType: "text",
-        attachments: [],
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // Update the local messages state with the new message
-    setMessages((prev) => [
-      ...prev,
-      {
-        senderId: userId,
-        senderName: member.name,
-        content: newMessage.trim(), // Ensure content is trimmed
-        createdAt: new Date().toISOString(),
-      },
-    ]);
-
-    // Clear the input field after sending
-    setNewMessage("");
-  };
-
-  const handleTyping = (e) => {
-    if (socket && selectedChannel) {
-      const member = JSON.parse(localStorage.getItem("member"));
-      const userId = member?._id;
-
-      console.log("typing going to trigger");
-
-      // Emit "typing" event only if not already typing
-      if (!isTyping) {
-        setIsTyping(true);
-        socket.emit("typing", { channelId: selectedChannel._id, userId, conversationId });
-      }
-
-      // Clear any existing timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-
-      // Set a new timeout for detecting typing stop
-      typingTimeoutRef.current = setTimeout(() => {
-        setIsTyping(false); // Reset typing status
-        socket.emit("stop_typing", { channelId: selectedChannel._id, userId , conversationId });
-      }, 1000); // 1 second after the last key press
-    }
-  };
-
-  const handleSelectChannel = (employee) => {
-    const memberId = JSON.parse(localStorage.getItem("member"))?._id;
-    const conversationId = [memberId, employee._id].sort().join("_");
-    setConversationId(conversationId);
-
-    setSelectedChannel({
-      name: employee.name,
-      employeeId: employee._id, // Store employee ID for DMs
-      conversationId, // Store conversationId for DMs
-      description: "Direct message",
+    sendMessage({
+      socket,
+      selectedChannel,
+      newMessage,
+      setMessages,
+      setNewMessage
     });
   };
 
-  console.log("typingUsers", typingUsers);
+  const handleTypingHandler = (e) => {
+    
+    handleTyping(
+      e, 
+      socket, 
+      selectedChannel, 
+      isTyping, 
+      setIsTyping, 
+      typingTimeoutRef, 
+      conversationId
+    );
+  };
+
+  const handleSelectChannelHandler = (employee) => {
+    handleSelectChannel(employee, setConversationId, setSelectedChannel);
+  };
 
   return (
     <section className="flex h-full p-5 gap-6">
@@ -360,7 +141,7 @@ export default function Chat() {
                       ? "bg-primary text-black"
                       : "bg-secondary text-muted-foreground"
                   }`}
-                  onClick={() => handleSelectChannel(employee)}
+                  onClick={() => handleSelectChannelHandler(employee)}
                 >
                   {employee.name}
                 </Button>
@@ -448,7 +229,7 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        <form className="flex gap-2 p-4" onSubmit={sendMessage}>
+        <form className="flex gap-2 p-4" onSubmit={sendMessageHandler}>
           <div className="flex flex-1 items-center gap-2 rounded-md border px-2 py-1">
             <div className="space-x-1">
               <Button size="icon" type="button" variant="ghost">
@@ -468,7 +249,7 @@ export default function Chat() {
               value={newMessage}
               onChange={(e) => {
                 setNewMessage(e.target.value); // Update message state
-                handleTyping(e); // Trigger typing event on every input change
+                handleTypingHandler(e);  // Trigger typing event on every input change
               }} // Detect typing when input is focused
             />
             <Button type="submit" size="icon" variant="ghost">
