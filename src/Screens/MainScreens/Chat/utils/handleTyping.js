@@ -20,7 +20,7 @@ export const handleTyping = (
           userId,
           conversationId,
         });
-      }
+      } 
   
       // Clear any existing timeout
       if (typingTimeoutRef.current) {

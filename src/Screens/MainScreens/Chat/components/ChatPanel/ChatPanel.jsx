@@ -1,7 +1,13 @@
 /* eslint-disable react/prop-types */
 // components/ChatPanel/ChatPanel.js
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
-import { IconArrowLeft, IconPlus, IconPhotoPlus, IconPaperclip, IconSend } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconPlus,
+  IconPhotoPlus,
+  IconPaperclip,
+  IconSend,
+} from "@tabler/icons-react";
 import { format } from "date-fns";
 
 const ChatPanel = ({
@@ -13,7 +19,7 @@ const ChatPanel = ({
   sendMessageHandler,
   newMessage,
   setNewMessage,
-  handleTypingHandler
+  handleTypingHandler,
 }) => {
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -25,7 +31,9 @@ const ChatPanel = ({
           </Button>
           <div>
             <span className="text-sm font-medium">{selectedChannel?.name}</span>
-            <span className="block text-xs text-muted-foreground">{selectedChannel?.description}</span>
+            <span className="block text-xs text-muted-foreground">
+              {selectedChannel?.description}
+            </span>
           </div>
         </div>
       </div>
@@ -43,7 +51,9 @@ const ChatPanel = ({
                   : "self-start rounded-[16px_16px_16px_0] bg-primary/85 text-white"
               }`}
             >
-              <div className="font-semibold text-red-300">{msg?.senderName}</div>
+              <div className="font-semibold text-red-300">
+                {msg?.senderName}
+              </div>
               <div>{msg?.content}</div>
               {msg.attachments?.length > 0 && (
                 <div className="mt-2">

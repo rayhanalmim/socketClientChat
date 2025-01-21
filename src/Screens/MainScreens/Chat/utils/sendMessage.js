@@ -13,6 +13,7 @@ const sendMessage = ({ socket, selectedChannel, newMessage, setMessages, setNewM
   
       socket.emit("send_dm", {
         senderId: userId,
+        senderName: member.name,
         recipientId,
         content: newMessage.trim(),
       });
