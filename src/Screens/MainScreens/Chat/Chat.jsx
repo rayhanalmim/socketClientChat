@@ -26,6 +26,8 @@ export default function Chat() {
   const typingTimeoutRef = useRef(null); // Ref to manage the typing timeout
   const [isTyping, setIsTyping] = useState(false); // Track if typing is already active
   const [employees, setEmployees] = useState([]);
+  const [currentUser, setcurrentUser] = useState(null);
+  const [conversationId, setConversationId] = useState(null);
 
   const [typingUsers, setTypingUsers] = useState([]); // Store typing users
 
@@ -34,6 +36,7 @@ export default function Chat() {
       try {
         const member = JSON.parse(localStorage.getItem("member"));
         const userId = member?._id;
+        setcurrentUser(member);
 
         if (!userId) {
           console.error("User ID not found in localStorage");
@@ -43,13 +46,13 @@ export default function Chat() {
         const response = await axios.get(
           `${
             import.meta.env.VITE_APP_BACKEND_URL
-          }api/channel/getChannelMember/${userId}`
+          }api/channel/getDmUser/${userId}`
         );
 
         const responseEmployee = await axios.get(
           `${
             import.meta.env.VITE_APP_BACKEND_URL
-          }api/employeeApp/getAllEmployees`
+          }api/employeeApp/getAllEmployees/${userId}`
         );
         setEmployees(responseEmployee.data);
 
@@ -85,6 +88,17 @@ export default function Chat() {
       const member = JSON.parse(localStorage.getItem("member"));
       const userId = member?._id;
 
+      // New message listener
+      const dmMessegeListener = (data) => {
+        console.log("Message received:", data);
+        setMessages((prev) => {
+          if (userId === data.senderId) {
+            return prev; // Ignore messages sent by the same user
+          }
+          return [...prev, data];
+        });
+      };
+
       console.log(
         "selectedChannel.conversationId",
         selectedChannel.conversationId
@@ -104,24 +118,15 @@ export default function Chat() {
         const [senderId, recipientId] =
           selectedChannel.conversationId.split("_");
 
-          console.log("reciption id",recipientId)
+        console.log("reciption id", recipientId);
 
-        socket.emit("join_dm", { conversationId:selectedChannel.conversationId });
+        socket.emit("join_dm", {
+          conversationId: selectedChannel.conversationId,
+        });
 
         socket.on("private_message_history", (data) => {
           setMessages(data.reverse());
         });
-
-        // New message listener
-      const dmMessegeListener = (data) => {
-        console.log("Message received:", data);
-        setMessages((prev) => {
-          if (userId === data.senderId) {
-            return prev; // Ignore messages sent by the same user
-          }
-          return [...prev, data];
-        });
-      };
 
         socket.on("recived_dm", dmMessegeListener);
       } else {
@@ -163,6 +168,9 @@ export default function Chat() {
       // Typing indicator listeners
       const typingListener = ({ userId, name }) => {
         setTypingUsers((prev) => [...prev, { userId, name }]);
+        console.log(
+          "typing indecator trigger form the dm......................................xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        );
       };
 
       const stopTypingListener = ({ userId }) => {
@@ -181,7 +189,8 @@ export default function Chat() {
 
         // Remove listeners to avoid memory leaks
         socket.off("private_message_history");
-        socket.off("send_dm");
+        socket.off("send_dm", dmMessegeListener);
+        socket.off("recived_dm");
         socket.off("error", errorListener);
         socket.off("message_history", messageHistoryListener);
         socket.off("receive_message", messageListener);
@@ -205,21 +214,15 @@ export default function Chat() {
     const member = JSON.parse(localStorage.getItem("member"));
     const userId = member?._id;
 
-
-
     if (selectedChannel.conversationId) {
       // Send DM
-      const recipientId = selectedChannel.conversationId
-      ? selectedChannel.conversationId
-          .split("_")
-          .find((id) => id !== userId)
-      : null;  // or handle this case accordingly          
-    if (!recipientId) {
-      console.error("Recipient ID could not be determined.");
-      return;
-    }
+      const recipientId = selectedChannel.employeeId;
+      if (!recipientId) {
+        console.error("Recipient ID could not be determined.");
+        return;
+      }
 
-    console.log("sender id, reciver id", userId, recipientId);
+      console.log("sender id, reciver id", userId, recipientId);
 
       socket.emit("send_dm", {
         senderId: userId,
@@ -227,7 +230,7 @@ export default function Chat() {
         content: newMessage.trim(),
       });
 
-      console.log('dm triggered ') 
+      console.log("dm triggered ");
     } else {
       // Send Channel Message
       socket.emit("send_message", {
@@ -260,10 +263,12 @@ export default function Chat() {
       const member = JSON.parse(localStorage.getItem("member"));
       const userId = member?._id;
 
+      console.log("typing going to trigger");
+
       // Emit "typing" event only if not already typing
       if (!isTyping) {
         setIsTyping(true);
-        socket.emit("typing", { channelId: selectedChannel._id, userId });
+        socket.emit("typing", { channelId: selectedChannel._id, userId, conversationId });
       }
 
       // Clear any existing timeout
@@ -274,9 +279,22 @@ export default function Chat() {
       // Set a new timeout for detecting typing stop
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false); // Reset typing status
-        socket.emit("stop_typing", { channelId: selectedChannel._id, userId });
+        socket.emit("stop_typing", { channelId: selectedChannel._id, userId , conversationId });
       }, 1000); // 1 second after the last key press
     }
+  };
+
+  const handleSelectChannel = (employee) => {
+    const memberId = JSON.parse(localStorage.getItem("member"))?._id;
+    const conversationId = [memberId, employee._id].sort().join("_");
+    setConversationId(conversationId);
+
+    setSelectedChannel({
+      name: employee.name,
+      employeeId: employee._id, // Store employee ID for DMs
+      conversationId, // Store conversationId for DMs
+      description: "Direct message",
+    });
   };
 
   console.log("typingUsers", typingUsers);
@@ -284,7 +302,7 @@ export default function Chat() {
   return (
     <section className="flex h-full p-5 gap-6">
       {/* Sidebar */}
-      <div className="flex flex-col gap-2 w-1/4">
+      <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
         <div className="sticky top-0 z-10 bg-background px-4 pb-3 shadow-md">
           <div className="flex items-center justify-between py-2">
             <div className="flex gap-2">
@@ -305,57 +323,49 @@ export default function Chat() {
           </label>
         </div>
 
-        <div className="flex flex-col gap-2 overflow-y-auto max-h-48 border-b">
-          <h2 className="text-lg font-semibold px-4">Joined Channels</h2>
-          {channels.map((channel) => (
-            <Button
-              key={channel._id}
-              className={`w-full text-left p-2 ${
-                selectedChannel?._id === channel._id
-                  ? "bg-primary text-white"
-                  : "bg-secondary text-muted-foreground"
-              }`}
-              onClick={() => setSelectedChannel(channel)}
-            >
-              {channel.name}
-            </Button>
-          ))}
-        </div>
+        <div className="flex flex-col gap-2 flex-1">
+          <div className="flex-1 overflow-auto border-b">
+            <h2 className="text-lg font-semibold px-4 mb-3">Joined Channels</h2>
+            <div className="flex flex-col gap-2 overflow-y-auto">
+              {channels.map((channel) => (
+                <Button
+                  key={channel._id}
+                  className={`w-full text-left p-2 ${
+                    selectedChannel?._id === channel._id
+                      ? "bg-primary text-black"
+                      : "bg-secondary text-muted-foreground"
+                  }`}
+                  onClick={() => setSelectedChannel(channel)}
+                >
+                  {channel.name}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-        <div>
-          <h2 className="text-lg font-semibold px-4">Direct Messages</h2>
-          <div className="flex flex-col gap-2 overflow-y-auto">
-            {employees.map((employee) => (
-              <Button
-                key={employee._id}
-                className={`w-full text-left p-2 ${
-                  selectedChannel?.conversationId ===
-                  [
-                    JSON.parse(localStorage.getItem("member"))?._id,
-                    employee._id,
-                  ]
-                    .sort()
-                    .join("_")
-                    ? "bg-primary text-white"
-                    : "bg-secondary text-muted-foreground"
-                }`}
-                onClick={() => {
-                  const memberId = JSON.parse(
-                    localStorage.getItem("member")
-                  )?._id;
-                  const conversationId = [memberId, employee._id]
-                    .sort()
-                    .join("_");
-                  setSelectedChannel({
-                    name: employee.name,
-                    conversationId, // Store conversationId for DMs
-                    description: "Direct message",
-                  });
-                }}
-              >
-                {employee.name}
-              </Button>
-            ))}
+          <div className="flex-1 overflow-auto">
+            <h2 className="text-lg font-semibold px-4 mb-3">Direct Messages</h2>
+            <div className="flex flex-col gap-2 overflow-y-auto">
+              {employees.map((employee) => (
+                <Button
+                  key={employee._id}
+                  className={`w-full text-left p-2 ${
+                    selectedChannel?.conversationId ===
+                    [
+                      JSON.parse(localStorage.getItem("member"))?._id,
+                      employee._id,
+                    ]
+                      .sort()
+                      .join("_")
+                      ? "bg-primary text-black"
+                      : "bg-secondary text-muted-foreground"
+                  }`}
+                  onClick={() => handleSelectChannel(employee)}
+                >
+                  {employee.name}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -422,12 +432,14 @@ export default function Chat() {
           <div className="my-1">
             {typingUsers.length > 0 && (
               <p className="text-gray-500 text-sm italic my-1">
-                {typingUsers.map((user, index) => (
-                  <span key={user.userId}>
-                    {user.name} is typing
-                    {index === typingUsers.length - 1 ? "..." : ","}{" "}
-                  </span>
-                ))}
+                {typingUsers
+                  .filter((user) => user.userId !== currentUser._id) // Filter out current user's typing indicator
+                  .map((user, index) => (
+                    <span key={user.userId}>
+                      {user.name} is typing
+                      {index === typingUsers.length - 1 ? "..." : ","}{" "}
+                    </span>
+                  ))}
               </p>
             )}
           </div>
