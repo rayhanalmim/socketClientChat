@@ -1,22 +1,22 @@
-import { CLCreateBrowserRouter } from "@antopolis/admin-component-library/dist/helper";
+import { CLCreateBrowserRouter } from '@antopolis/admin-component-library/dist/helper';
 import {
   AuthScreen,
   MainScreen,
-} from "@antopolis/admin-component-library/dist/screens";
-import Logo from "../assets/logo.png";
-import authRoutes from "../Screens/AuthScreens/AuthRoutes";
-import mainRoutes from "../Screens/MainScreens/MainRoutes";
-import { links } from "./sideLinks";
+} from '@antopolis/admin-component-library/dist/screens';
+import Logo from '../assets/logo.png';
+import authRoutes from '../Screens/AuthScreens/AuthRoutes';
+import mainRoutes from '../Screens/MainScreens/MainRoutes';
+import { links } from './sideLinks';
 
 const routes = CLCreateBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: (
       <MainScreen
         links={links}
         logo={Logo}
         isRoleBased={false}
-        title={"Anthill Club"}
+        title={'Ants Chat'}
         // isPermissionBased={true}
         // isSettingsRequired={true}
         // isSettingsRequired={false}
@@ -25,7 +25,7 @@ const routes = CLCreateBrowserRouter([
     children: mainRoutes,
   },
   {
-    path: "/auth",
+    path: '/auth',
     element: <AuthScreen />,
     children: authRoutes,
   },
