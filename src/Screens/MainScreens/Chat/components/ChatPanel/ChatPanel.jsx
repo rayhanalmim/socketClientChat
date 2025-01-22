@@ -19,12 +19,11 @@ const ChatPanel = ({
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editedMessageContent, setEditedMessageContent] = useState("");
 
-  console.log('selected channel from chat panel:', selectedChannel);
+  console.log("selected channel from chat panel:", selectedChannel);
 
   // Update message content function
   const updateMessage = async (messageId, newContent) => {
     try {
-
       const endpoint = selectedChannel._id
         ? `api/message/group/${selectedChannel._id}/message/${messageId}`
         : `api/message/dm/${selectedChannel.conversationId}/message/${messageId}`;
@@ -34,7 +33,7 @@ const ChatPanel = ({
         { content: newContent }
       );
       console.log("Message updated successfully:", response.data);
-      
+
       setEditingMessageId(null); // Reset edit state
     } catch (error) {
       console.error("Error updating message:", error);
@@ -67,7 +66,7 @@ const ChatPanel = ({
       </div>
 
       {/* Chat Messages */}
-      <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-1">
+      <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((msg, index) => {
           if (!msg?.content.trim()) return null; // Skip empty messages
 
@@ -78,7 +77,7 @@ const ChatPanel = ({
           return (
             <div
               key={index}
-              className={`flex items-end ${
+              className={`relative flex ${
                 isSender ? "justify-end" : "justify-start"
               } mb-4`}
             >
@@ -87,60 +86,85 @@ const ChatPanel = ({
                 <img
                   src={msg.senderImage}
                   alt={msg.senderName}
-                  className="w-8 h-8 rounded-full mr-3"
+                  className="w-8 h-8 rounded-full mr-3 mt-2"
                 />
               )}
 
-              {/* Message Bubble */}
+              {/* Parent Wrapper */}
               <div
-                className={`max-w-72 px-3 py-2 shadow-lg ${
-                  isSender
-                    ? "rounded-[16px_16px_0_16px] bg-gray-800 text-white" // Sender's bubble: blue
-                    : "rounded-[16px_16px_16px_0] bg-gray-800 text-gray-200" // Receiver's bubble: dark gray
-                }`}
+                className="group relative flex items-center space-x-2"
+                style={{ background: "none" }}
               >
-                <div className="font-semibold text-yellow-400">
-                  {msg?.senderName}
+                {/* Message Bubble */}
+                <div
+                  className={`relative max-w-72 px-3 py-2 shadow-lg ${
+                    isSender
+                      ? "rounded-[16px_16px_0_16px] bg-slate-900 text-white"
+                      : "rounded-[16px_16px_16px_0] bg-slate-900 text-gray-200"
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-semibold text-white">
+                      {msg?.senderName}
+                    </span>
+                    <span className="text-xs font-light text-gray-400">
+                      {msg?.createdAt &&
+                        format(new Date(msg.createdAt), "h:mm a")}
+                    </span>
+                  </div>
+
+                  {/* Editable Message Content */}
+                  {editingMessageId === msg._id ? (
+                    <div>
+                      <textarea
+                        className="w-full bg-gray-700 text-white p-2 rounded"
+                        value={editedMessageContent}
+                        onChange={(e) =>
+                          setEditedMessageContent(e.target.value)
+                        }
+                      />
+                      <button
+                        onClick={() => handleSaveEdit(msg._id, isGroupMessage)}
+                        className="text-blue-500 mt-2"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-gray-400">{msg?.content}</div>
+                  )}
+
+                  {msg.attachments?.length > 0 && (
+                    <div className="mt-2">
+                      {msg.attachments.map((attachment, idx) => (
+                        <a
+                          key={idx}
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 underline"
+                        >
+                          {attachment.name || "Attachment"}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Editable Message Content */}
-                {editingMessageId === msg._id ? (
-                  <div>
-                    <textarea
-                      className="w-full bg-gray-700 text-white p-2 rounded"
-                      value={editedMessageContent}
-                      onChange={(e) => setEditedMessageContent(e.target.value)}
+                {/* Edit Button */}
+                {isSender && !editingMessageId && (
+                  <button
+                    onClick={() =>
+                      handleEditClick(msg._id, msg.content, isGroupMessage)
+                    }
+                    className="absolute hidden group-hover:block left-[-24px] top-1"
+                  >
+                    <IconEdit
+                      size={17}
+                      className="text-gray-500 hover:text-gray-300"
                     />
-                    <button
-                      onClick={() => handleSaveEdit(msg._id, isGroupMessage)}
-                      className="text-blue-500 mt-2"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <div>{msg?.content}</div>
+                  </button>
                 )}
-
-                {msg.attachments?.length > 0 && (
-                  <div className="mt-2">
-                    {msg.attachments.map((attachment, idx) => (
-                      <a
-                        key={idx}
-                        href={attachment.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 underline"
-                      >
-                        {attachment.name || "Attachment"}
-                      </a>
-                    ))}
-                  </div>
-                )}
-
-                <span className="block mt-1 text-xs font-light text-gray-400">
-                  {msg?.createdAt && format(new Date(msg.createdAt), "h:mm a")}
-                </span>
               </div>
 
               {/* Sender Image for Sent Messages */}
@@ -148,21 +172,8 @@ const ChatPanel = ({
                 <img
                   src={msg.senderImage}
                   alt={msg.senderName}
-                  className="w-8 h-8 rounded-full ml-3"
+                  className="w-8 h-8 rounded-full ml-3 mt-2"
                 />
-              )}
-
-              {/* Edit Button */}
-              {isSender && !editingMessageId && (
-                <Button
-                  onClick={() =>
-                    handleEditClick(msg._id, msg.content, isGroupMessage)
-                  }
-                  size="icon"
-                  variant="ghost"
-                >
-                  <IconEdit size={16} />
-                </Button>
               )}
             </div>
           );
