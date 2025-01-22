@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react"; // Added useRef
 import useFetchChannelsAndEmployees from "./Hooks/useFetchChannelsAndEmployees";
 import useSocket from "./Hooks/useSocket";
 import useChatListeners from "./Hooks/useChatListeners";
-import sendMessage from "./utils/sendMessage"; 
-import { handleTyping } from "./utils/handleTyping"; 
+import sendMessage from "./utils/sendMessage";
+import { handleTyping } from "./utils/handleTyping";
 import { handleSelectChannel } from "./utils/handleSelectChannel";
 import Sidebar from "./components/Sidebar/Sidebar";
 import ChatPanel from "./components/ChatPanel/ChatPanel";
@@ -12,12 +12,12 @@ export default function Chat() {
   const [search, setSearch] = useState("");
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef(null); 
-  const typingTimeoutRef = useRef(null); 
-  const [isTyping, setIsTyping] = useState(false); 
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
   const [conversationId, setConversationId] = useState(null);
 
-  const [typingUsers, setTypingUsers] = useState([]); 
+  const [typingUsers, setTypingUsers] = useState([]);
   const socket = useSocket();
 
   const {
@@ -26,6 +26,8 @@ export default function Chat() {
     channels,
     selectedChannel,
     setSelectedChannel,
+    setChannels,
+    setEmployees,
   } = useFetchChannelsAndEmployees();
 
   useChatListeners({
@@ -34,7 +36,6 @@ export default function Chat() {
     setMessages,
     setTypingUsers,
   });
-
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,18 +48,18 @@ export default function Chat() {
       selectedChannel,
       newMessage,
       setMessages,
-      setNewMessage
+      setNewMessage,
     });
   };
 
   const handleTypingHandler = (e) => {
     handleTyping(
-      e, 
-      socket, 
-      selectedChannel, 
-      isTyping, 
-      setIsTyping, 
-      typingTimeoutRef, 
+      e,
+      socket,
+      selectedChannel,
+      isTyping,
+      setIsTyping,
+      typingTimeoutRef,
       conversationId
     );
   };
@@ -70,18 +71,20 @@ export default function Chat() {
   return (
     <section className="flex h-full p-5 gap-6">
       {/* Sidebar */}
-      <Sidebar 
-        search={search} 
-        setSearch={setSearch} 
-        channels={channels} 
-        selectedChannel={selectedChannel} 
-        setSelectedChannel={setSelectedChannel} 
-        employees={employees} 
-        handleSelectChannelHandler={handleSelectChannelHandler} 
+      <Sidebar
+        search={search}
+        setSearch={setSearch}
+        setChannels={setChannels}
+        setEmployees={setEmployees}
+        channels={channels}
+        selectedChannel={selectedChannel}
+        setSelectedChannel={setSelectedChannel}
+        employees={employees}
+        handleSelectChannelHandler={handleSelectChannelHandler}
       />
 
       {/* Chat Panel */}
-      <ChatPanel 
+      <ChatPanel
         selectedChannel={selectedChannel}
         messages={messages}
         currentUser={currentUser}

@@ -13,6 +13,7 @@ const useChatListeners = ({
 
       // New message listener
       const dmMessegeListener = (data) => {
+        console.log('recived new data with the user image : ', data);
         setMessages((prev) => {
           if (userId === data.senderId) {
             return prev; // Ignore messages sent by the same user

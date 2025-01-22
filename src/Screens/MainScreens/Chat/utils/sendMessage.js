@@ -1,7 +1,13 @@
-const sendMessage = ({ socket, selectedChannel, newMessage, setMessages, setNewMessage }) => {
+import axios from "axios";
+
+const sendMessage = async({ socket, selectedChannel, newMessage, setMessages, setNewMessage }) => {
     if (!newMessage.trim() || !socket) return; // Prevent sending empty messages
     const member = JSON.parse(localStorage.getItem("member"));
     const userId = member?._id;
+
+    const response = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/employeeApp/getEmployeeById/${userId}`);
+
+    console.log("user from the db : ", response.data);
   
     if (selectedChannel.conversationId) {
       // Send DM
@@ -34,6 +40,7 @@ const sendMessage = ({ socket, selectedChannel, newMessage, setMessages, setNewM
       ...prev,
       {
         senderId: userId,
+        senderImage : response.data.dp,
         senderName: member.name,
         content: newMessage.trim(), // Ensure content is trimmed
         createdAt: new Date().toISOString(),

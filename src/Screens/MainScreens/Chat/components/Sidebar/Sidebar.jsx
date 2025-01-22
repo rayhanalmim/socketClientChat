@@ -2,8 +2,30 @@
 // components/Sidebar/Sidebar.js
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { IconMessages, IconSearch } from "@tabler/icons-react";
+import axios from "axios";
+import { useEffect } from "react";
 
-const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChannel, employees, handleSelectChannelHandler }) => {
+const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChannel, employees, handleSelectChannelHandler, setChannels, setEmployees }) => {
+  console.log("search", search);
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+   
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/channel/search`, {
+          params: { searchQuery: search },
+        });
+        setChannels(data.channels);
+        setEmployees(data.employees);
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      }
+    };
+
+    const debounceTimeout = setTimeout(fetchSearchResults, 300); // Debounce API call
+    return () => clearTimeout(debounceTimeout);
+  }, [search, setChannels, setEmployees]);
+
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
       <div className="sticky top-0 z-10 bg-background px-4 pb-3 shadow-md">

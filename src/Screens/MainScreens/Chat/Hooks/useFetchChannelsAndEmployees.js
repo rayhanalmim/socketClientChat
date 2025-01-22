@@ -42,7 +42,7 @@ const useFetchChannelsAndEmployees = () => {
     fetchChannelsAndEmployee();
   }, []);
 
-  return { currentUser, employees, channels, selectedChannel, setSelectedChannel };
+  return { currentUser, employees, channels, selectedChannel, setSelectedChannel, setChannels, setEmployees };
 };
 
 export default useFetchChannelsAndEmployees;
