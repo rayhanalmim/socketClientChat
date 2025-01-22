@@ -5,21 +5,36 @@ import { IconMessages, IconSearch } from "@tabler/icons-react";
 import axios from "axios";
 import { useEffect } from "react";
 
-const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChannel, employees, handleSelectChannelHandler, setChannels, setEmployees }) => {
+const Sidebar = ({
+  search,
+  setSearch,
+  channels,
+  selectedChannel,
+  setSelectedChannel,
+  employees,
+  handleSelectChannelHandler,
+  setChannels,
+  setEmployees,
+}) => {
   console.log("search", search);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
       const member = JSON.parse(localStorage.getItem("member"));
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/channel/search/${member._id}`, {
-          params: { searchQuery: search },
-        });
-        console.log("chennel data from side bar:", data.channels);
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_APP_BACKEND_URL}api/channel/search/${
+            member._id
+          }`,
+          {
+            params: { searchQuery: search },
+          }
+        );
+        console.log("channel data from sidebar:", data.channels);
         setChannels(data.channels);
         setEmployees(data.employees);
       } catch (error) {
-        console.error('Error fetching search results:', error);
+        console.error("Error fetching search results:", error);
       }
     };
 
@@ -27,8 +42,11 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
     return () => clearTimeout(debounceTimeout);
   }, [search, setChannels, setEmployees]);
 
+  console.log(employees);
+
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
+      {/* Header */}
       <div className="sticky top-0 z-10 bg-background px-4 pb-3 shadow-md">
         <div className="flex items-center justify-between py-2">
           <div className="flex gap-2">
@@ -37,6 +55,7 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
           </div>
         </div>
 
+        {/* Search Input */}
         <label className="flex h-12 w-full items-center rounded-md border px-2">
           <IconSearch size={15} className="mr-2 stroke-slate-500" />
           <input
@@ -49,10 +68,10 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
         </label>
       </div>
 
+      {/* Channels Section */}
       <div className="flex flex-col gap-2 flex-1">
-      <h2 className="text-lg font-semibold px-4 mb-3">Joined Channels</h2>
+        <h2 className="text-lg font-semibold px-4 mb-3">Joined Channels</h2>
         <div className="flex-1 overflow-auto border-b">
-          
           <div className="flex flex-col gap-2 overflow-y-auto">
             {channels.map((channel) => (
               <Button
@@ -70,13 +89,14 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
           </div>
         </div>
 
+        {/* Direct Messages Section */}
         <div className="flex-1 overflow-auto">
           <h2 className="text-lg font-semibold px-4 mb-3">Direct Messages</h2>
           <div className="flex flex-col gap-2 overflow-y-auto">
             {employees.map((employee) => (
-              <Button
+              <button
                 key={employee._id}
-                className={`w-full text-left p-2 ${
+                className={`flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors ${
                   selectedChannel?.conversationId ===
                   [
                     JSON.parse(localStorage.getItem("member"))?._id,
@@ -84,13 +104,18 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
                   ]
                     .sort()
                     .join("_")
-                    ? "bg-primary text-black"
-                    : "bg-secondary text-muted-foreground"
+                    ? " text-white border border-white rounded"
+                    : " text-gray-500 hover:bg-muted"
                 }`}
                 onClick={() => handleSelectChannelHandler(employee)}
               >
-                {employee.name}
-              </Button>
+                <img
+                  src={employee.dp}
+                  alt={employee.name}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+                <span className="text-base font-medium">{employee.name}</span>
+              </button>
             ))}
           </div>
         </div>
