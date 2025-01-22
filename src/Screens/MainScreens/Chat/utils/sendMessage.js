@@ -20,6 +20,7 @@ const sendMessage = async({ socket, selectedChannel, newMessage, setMessages, se
       socket.emit("send_dm", {
         senderId: userId,
         senderName: member.name,
+        messageType: "text",
         recipientId,
         content: newMessage.trim(),
       });

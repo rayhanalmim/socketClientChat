@@ -10,11 +10,12 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
 
   useEffect(() => {
     const fetchSearchResults = async () => {
-   
+      const member = JSON.parse(localStorage.getItem("member"));
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/channel/search`, {
+        const { data } = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/channel/search/${member._id}`, {
           params: { searchQuery: search },
         });
+        console.log("chennel data from side bar:", data.channels);
         setChannels(data.channels);
         setEmployees(data.employees);
       } catch (error) {
@@ -49,8 +50,9 @@ const Sidebar = ({ search, setSearch, channels, selectedChannel, setSelectedChan
       </div>
 
       <div className="flex flex-col gap-2 flex-1">
+      <h2 className="text-lg font-semibold px-4 mb-3">Joined Channels</h2>
         <div className="flex-1 overflow-auto border-b">
-          <h2 className="text-lg font-semibold px-4 mb-3">Joined Channels</h2>
+          
           <div className="flex flex-col gap-2 overflow-y-auto">
             {channels.map((channel) => (
               <Button

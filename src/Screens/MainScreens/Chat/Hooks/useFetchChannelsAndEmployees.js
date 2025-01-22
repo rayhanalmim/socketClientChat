@@ -24,12 +24,15 @@ const useFetchChannelsAndEmployees = () => {
             import.meta.env.VITE_APP_BACKEND_URL
           }api/channel/getDmUser/${userId}`
         );
+        
+        console.log("channel from the db xxxxxxxxxxxx : ", response.data);
 
         const responseEmployee = await axios.get(
           `${
             import.meta.env.VITE_APP_BACKEND_URL
           }api/employeeApp/getAllEmployees/${userId}`
         );
+
         setEmployees(responseEmployee.data);
 
         setChannels(response.data); // Assuming API returns an array of channels
