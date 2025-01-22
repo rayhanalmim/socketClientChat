@@ -7,12 +7,12 @@ import {
 } from "@antopolis/admin-component-library/dist/inputs";
 import { FormWrapper } from "@antopolis/admin-component-library/dist/form";
 import axiosChannelInstance from "../../../Hooks/Instances/useAxiosCourseInstance";
-import { COURSE_APIS } from "./CourseAPIs";
+import { COURSE_APIS } from "./APIs/CourseAPIs";
 
 import { Button } from "@antopolis/admin-component-library/dist/ui";
 
 // eslint-disable-next-line react/prop-types
-export default function CreateCourse({ setCreateModal, toggleFetch, ...props }) {
+export default function CreateChannel({ setCreateModal, toggleFetch, ...props }) {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(data) {

@@ -20,14 +20,14 @@ import {
   import {
     CMS_USER_API,
 
-  } from '../Course/Utils/Apis';
+  } from './Utils/Apis';
   
-  import DataLoader from '../Course/Utils/Dataloader/DataLoader';
-  import InviteProjectMemberModal from './inviteProjectMember';
+  import DataLoader from './Utils/Dataloader/DataLoader';
+  import InviteProjectMemberModal from './InviteChannelMember';
 import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
 
   
-  function ProjectMembers() {
+  function ChannelMember() {
     const { id } = CLUseParams();
     const [onClose, setOnClose] = useState(false);
 
@@ -35,8 +35,6 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
       data,
       setData,
       setFilter,
-      setEditModal,
-      editModal,
       createModal,
       setCreateModal,
       archiveModal,
@@ -51,10 +49,7 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
       toggle,
       paginationState,
       setPaginationState,
-      setTotalPages,
       setTotalData,
-      viewModal,
-      setViewModal,
       setIsLoading,
       isLoading,
     } = useEntityState();
@@ -94,6 +89,7 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
       }
   
       fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [toggle, filter, onClose]);
   
     return isLoading ? (
@@ -170,5 +166,5 @@ import { CLUseParams } from '@antopolis/admin-component-library/dist/helper';
     );
   }
   
-  export default ProjectMembers;
+  export default ChannelMember;
   

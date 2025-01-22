@@ -1,10 +1,8 @@
 import Dashboard from "./Dashboard/Dashboard";
-import Course from "./Course/Course";
-import CourseCategory from "./CourseCategory/CourseCategory";
-import CourseSubCategory from "./CourseSubCategory/CourseSubCategory";
 import Chat from "./Chat/Chat";
 // import { SocketProvider } from "../../Context/SocketContext";
-import ProjectMembers from "./Course/ChannelMember";
+import Channels from "./Channel/Channels";
+import ChannelMember from "./Channel/ChannelMember";
 
 const main = "main/";
 
@@ -14,8 +12,8 @@ const mainRoutes = [
     element: <Dashboard />,
   },
   {
-    path: main + "courses",
-    element: <Course />,
+    path: main + "channels",
+    element: <Channels />,
   },
   {
     path: main + "chat",
@@ -24,16 +22,8 @@ const mainRoutes = [
     ),
   },
   {
-    path: main + "courseCategories",
-    element: <CourseCategory />,
-  },
-  {
-    path: main + "chat",
-    element: <CourseSubCategory />,
-  },
-  {
-    path: main + "project/members/:id",
-    element: < ProjectMembers/>,
+    path: main + "channel/members/:id",
+    element: < ChannelMember/>,
   },
 ];
 

@@ -1,11 +1,9 @@
 /* eslint-disable react/prop-types */
-// components/ChatPanel/ChatPanel.js
+import { useState } from "react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
-import {
-  IconPaperclip,
-  IconSend,
-} from "@tabler/icons-react";
+import { IconPaperclip, IconSend, IconEdit } from "@tabler/icons-react";
 import { format } from "date-fns";
+import axios from "axios";
 
 const ChatPanel = ({
   selectedChannel,
@@ -18,12 +16,47 @@ const ChatPanel = ({
   setNewMessage,
   handleTypingHandler,
 }) => {
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editedMessageContent, setEditedMessageContent] = useState("");
+
+  console.log('selected channel from chat panel:', selectedChannel);
+
+  // Update message content function
+  const updateMessage = async (messageId, newContent) => {
+    try {
+
+      const endpoint = selectedChannel._id
+        ? `api/message/group/${selectedChannel._id}/message/${messageId}`
+        : `api/message/dm/${selectedChannel.conversationId}/message/${messageId}`;
+
+      const response = await axios.put(
+        `${import.meta.env.VITE_APP_BACKEND_URL}${endpoint}`,
+        { content: newContent }
+      );
+      console.log("Message updated successfully:", response.data);
+      
+      setEditingMessageId(null); // Reset edit state
+    } catch (error) {
+      console.error("Error updating message:", error);
+    }
+  };
+
+  const handleEditClick = (messageId, content) => {
+    setEditingMessageId(messageId); // Start editing the message
+    setEditedMessageContent(content); // Pre-fill the message content
+  };
+
+  const handleSaveEdit = (messageId, isGroupMessage) => {
+    if (editedMessageContent.trim()) {
+      updateMessage(messageId, editedMessageContent, isGroupMessage);
+    }
+  };
+
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
       {/* Chat Header */}
       <div className="mb-1 flex justify-between bg-secondary p-4 shadow-lg">
         <div className="flex gap-3">
-         
           <div>
             <span className="text-sm font-medium">{selectedChannel?.name}</span>
             <span className="block text-xs text-muted-foreground">
@@ -40,6 +73,7 @@ const ChatPanel = ({
 
           const isSender =
             msg.senderId === JSON.parse(localStorage.getItem("member"))?._id;
+          const isGroupMessage = !!selectedChannel; // Check if it's a group message
 
           return (
             <div
@@ -68,7 +102,26 @@ const ChatPanel = ({
                 <div className="font-semibold text-yellow-400">
                   {msg?.senderName}
                 </div>
-                <div>{msg?.content}</div>
+
+                {/* Editable Message Content */}
+                {editingMessageId === msg._id ? (
+                  <div>
+                    <textarea
+                      className="w-full bg-gray-700 text-white p-2 rounded"
+                      value={editedMessageContent}
+                      onChange={(e) => setEditedMessageContent(e.target.value)}
+                    />
+                    <button
+                      onClick={() => handleSaveEdit(msg._id, isGroupMessage)}
+                      className="text-blue-500 mt-2"
+                    >
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <div>{msg?.content}</div>
+                )}
+
                 {msg.attachments?.length > 0 && (
                   <div className="mt-2">
                     {msg.attachments.map((attachment, idx) => (
@@ -84,6 +137,7 @@ const ChatPanel = ({
                     ))}
                   </div>
                 )}
+
                 <span className="block mt-1 text-xs font-light text-gray-400">
                   {msg?.createdAt && format(new Date(msg.createdAt), "h:mm a")}
                 </span>
@@ -96,6 +150,19 @@ const ChatPanel = ({
                   alt={msg.senderName}
                   className="w-8 h-8 rounded-full ml-3"
                 />
+              )}
+
+              {/* Edit Button */}
+              {isSender && !editingMessageId && (
+                <Button
+                  onClick={() =>
+                    handleEditClick(msg._id, msg.content, isGroupMessage)
+                  }
+                  size="icon"
+                  variant="ghost"
+                >
+                  <IconEdit size={16} />
+                </Button>
               )}
             </div>
           );
@@ -125,7 +192,6 @@ const ChatPanel = ({
       <form className="flex gap-2 p-4" onSubmit={sendMessageHandler}>
         <div className="flex flex-1 items-center gap-2 rounded-md border px-2 py-1">
           <div className="space-x-1">
-           
             <Button size="icon" type="button" variant="ghost">
               <IconPaperclip size={20} />
             </Button>

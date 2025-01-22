@@ -12,14 +12,14 @@ import {
 } from "@antopolis/admin-component-library/dist/elements";
 import { CardLayout } from "@antopolis/admin-component-library/dist/layout";
 import { CLUseNavigate } from '@antopolis/admin-component-library/dist/helper';
-import CreateCourse from "./CreateCourse";
-import UpdateCourse from "./UpdateCourse";
+import CreateCourse from "./CreateChannel";
+import UpdateCourse from "./UpdateChannel";
 import axiosChannelInstance from "../../../Hooks/Instances/useAxiosCourseInstance";
-import { ALL_CHANNEL_API } from "./AllChannelApi";
+import { ALL_CHANNEL_API } from "./APIs/AllChannelApi";
 import { useEntityState } from "@antopolis/admin-component-library/dist/hooks";
 import { TbUsersGroup } from 'react-icons/tb';
 
-function Course() {
+function Channels() {
   const {
     data,
     setData,
@@ -107,13 +107,13 @@ function Course() {
                   extraActions={[
                     {
                       onClick: () => {
-                        navigate(`/main/project/members/${item?._id}`, {
+                        navigate(`/main/channel/members/${item?._id}`, {
                           state: item,
                         });
                       },
                       btnProps: {
                         icon: TbUsersGroup,
-                        tooltipText: 'Project Members',
+                        tooltipText: 'Channel Members',
                         toolTipContainerClassName:
                           '!text-pink-300  hover:!bg-pink-300 hover:!text-white ',
                         toolTipClassName: 'hover:!text-white ',
@@ -151,4 +151,4 @@ function Course() {
   );
 }
 
-export default Course;
+export default Channels;

@@ -9,9 +9,6 @@ import { Button } from "@antopolis/admin-component-library/dist/ui";
 
 import { FormWrapper } from "@antopolis/admin-component-library/dist/form";
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
-import { COURSE_APIS } from "./CourseAPIs";
-import { COURSE_CATEGORY_APIS } from "../CourseCategory/CourseCategoryAPIS";
-import { COURSE_SUB_CATEGORY_APIS } from "../CourseSubCategory/CourseSubCategoryAPIS";
 
 export default function UpdateCourse({ id = null, setEditModal, toggleFetch, ...props }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -106,7 +103,7 @@ export default function UpdateCourse({ id = null, setEditModal, toggleFetch, ...
     try {
       setIsLoading(true);
       const response = await axiosInstance.get(
-        `${COURSE_SUB_CATEGORY_APIS}?filter=active&category=${categoryId}`
+        ``
       );
       setSubcategories(response.data);
     } catch (err) {

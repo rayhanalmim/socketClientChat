@@ -11,8 +11,8 @@ export const links = [
     icon: <IconDashboard size={20} />,
   },
   {
-    label: 'Course',
-    path: '/main/courses',
+    label: 'Channels',
+    path: '/main/channels',
     icon: <IconTable size={20} />,
   },
   {

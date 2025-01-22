@@ -1,1 +1,0 @@
-export const COURSE_CATEGORY_APIS = 'courseCategories/'
