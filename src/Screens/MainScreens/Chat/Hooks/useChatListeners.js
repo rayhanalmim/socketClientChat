@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 const useChatListeners = ({
   socket,
@@ -8,12 +8,12 @@ const useChatListeners = ({
 }) => {
   useEffect(() => {
     if (socket && selectedChannel) {
-      const member = JSON.parse(localStorage.getItem("member"));
+      const member = JSON.parse(localStorage.getItem('member'));
       const userId = member?._id;
-
+      socket.emit('user_online', { userId });
       // New message listener
       const dmMessegeListener = (data) => {
-        console.log('recived new data with the user image : ', data);
+        console.log('received new data with the user image : ', data);
         setMessages((prev) => {
           if (userId === data.senderId) {
             return prev; // Ignore messages sent by the same user
@@ -27,37 +27,37 @@ const useChatListeners = ({
 
         // Leave the previous channel
         if (selectedChannel._id) {
-          socket.emit("leave_channel", {
+          socket.emit('leave_channel', {
             channelId: selectedChannel._id,
             userId,
           });
         }
 
-        socket.emit("join_dm", {
+        socket.emit('join_dm', {
           conversationId: selectedChannel.conversationId,
         });
 
-        socket.on("private_message_history", (data) => {
+        socket.on('private_message_history', (data) => {
           setMessages(data.reverse());
         });
 
-        socket.on("recived_dm", dmMessegeListener);
+        socket.on('recived_dm', dmMessegeListener);
       } else {
         // Leave the previous channel
         if (selectedChannel._id) {
-          socket.emit("leave_channel", {
+          socket.emit('leave_channel', {
             channelId: selectedChannel._id,
             userId,
           });
         }
 
         // Join the new channel
-        socket.emit("join_channel", { channelId: selectedChannel._id, userId });
+        socket.emit('join_channel', { channelId: selectedChannel._id, userId });
       }
 
       // Error handling
       const errorListener = (errorMessage) => {
-        console.error("Error:", errorMessage);
+        console.error('Error:', errorMessage);
         alert(`Error: ${errorMessage}`);
       };
 
@@ -86,22 +86,24 @@ const useChatListeners = ({
       };
 
       // Register all listeners
-      socket.on("error", errorListener);
-      socket.on("message_history", messageHistoryListener);
-      socket.on("receive_message", messageListener);
-      socket.on("typing", typingListener);
-      socket.on("stop_typing", stopTypingListener);
+
+      socket.on('error', errorListener);
+      socket.on('message_history', messageHistoryListener);
+      socket.on('receive_message', messageListener);
+      socket.on('typing', typingListener);
+      socket.on('stop_typing', stopTypingListener);
 
       return () => {
         // Remove listeners to avoid memory leaks
-        socket.off("private_message_history");
-        socket.off("send_dm", dmMessegeListener);
-        socket.off("recived_dm");
-        socket.off("error", errorListener);
-        socket.off("message_history", messageHistoryListener);
-        socket.off("receive_message", messageListener);
-        socket.off("typing", typingListener);
-        socket.off("stop_typing", stopTypingListener);
+        socket.off('user_online');
+        socket.off('private_message_history');
+        socket.off('send_dm', dmMessegeListener);
+        socket.off('recived_dm');
+        socket.off('error', errorListener);
+        socket.off('message_history', messageHistoryListener);
+        socket.off('receive_message', messageListener);
+        socket.off('typing', typingListener);
+        socket.off('stop_typing', stopTypingListener);
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
