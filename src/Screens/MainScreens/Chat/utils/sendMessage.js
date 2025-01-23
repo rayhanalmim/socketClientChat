@@ -41,6 +41,13 @@ const sendMessage = async ({
       attachmentData, // Send attachment path
     });
 
+      // Emit an event to update the unread count for the recipient
+      socket.emit("fetch_unread_count", {
+        userId: recipientId,
+        conversationId: selectedChannel.conversationId,
+      });
+  
+
 
     // Remove any existing listener to avoid duplicates
     socket.off("recived_dm");

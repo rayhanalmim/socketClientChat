@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// components/Sidebar/Sidebar.js
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { IconMessages, IconSearch } from "@tabler/icons-react";
 import axios from "axios";
@@ -19,6 +18,7 @@ const Sidebar = ({
 }) => {
   const socket = useSocket();
   const [userPresence, setUserPresence] = useState({});
+  const [unreadCounts, setUnreadCounts] = useState({}); // Store unread counts for each employee
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -63,11 +63,44 @@ const Sidebar = ({
       }));
     });
 
+    // Fetch unread message count for each employee
+    const member = JSON.parse(localStorage.getItem("member"));
+    employees.forEach((employee) => {
+      const conversationId = [member._id, employee._id].sort().join("_");
+      socket.emit("fetch_unread_count", { userId: member._id, conversationId });
+    });
+
+    // Listen for unread count updates
+    socket.on("unread_count", ({ conversationId, count }) => {
+      setUnreadCounts((prevCounts) => ({
+        ...prevCounts,
+        [conversationId]: count,
+      }));
+    });
+
     return () => {
       socket.off("all_users_presence");
       socket.off("user_presence_updated");
+      socket.off("unread_count");
     };
-  }, [socket]);
+  }, [socket, employees]);
+
+  const handleChannelClick = (employee) => {
+    const member = JSON.parse(localStorage.getItem("member"));
+    const conversationId = [member._id, employee._id].sort().join("_");
+
+    // Reset unread count for the selected channel (marking messages as read)
+    socket.emit("message_read", { userId: member._id, conversationId });
+
+    // Immediately update the unread count on the frontend to 0
+    setUnreadCounts((prevCounts) => ({
+      ...prevCounts,
+      [conversationId]: 0,
+    }));
+
+    // Call the handler for selecting a channel
+    handleSelectChannelHandler(employee);
+  };
 
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
@@ -119,39 +152,50 @@ const Sidebar = ({
           <h2 className="text-lg font-semibold px-4 mb-3">Direct Messages</h2>
           <div className="flex flex-col gap-2 overflow-y-auto">
             {employees.map((employee) => {
+              const member = JSON.parse(localStorage.getItem("member"));
+              const conversationId = [member._id, employee._id]
+                .sort()
+                .join("_");
+              const unreadCount = unreadCounts[conversationId] || 0;
               const isOnline = userPresence[employee._id] === "online";
+
               return (
                 <button
                   key={employee._id}
-                  className={`flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors ${
-                    selectedChannel?.conversationId ===
-                    [
-                      JSON.parse(localStorage.getItem("member"))?._id,
-                      employee._id,
-                    ]
-                      .sort()
-                      .join("_")
+                  className={`flex items-center justify-between gap-3 px-3 py-1.5 rounded-md transition-colors ${
+                    selectedChannel?.conversationId === conversationId
                       ? "text-white border border-white rounded "
                       : "text-gray-300 hover:bg-muted hover:bg-slate-700 "
                   }`}
-                  onClick={() => handleSelectChannelHandler(employee)}
+                  onClick={() => handleChannelClick(employee)}
                 >
-                  <div className="relative">
-                    {/* Profile Image */}
-                    <img
-                      src={employee.dp}
-                      alt={employee.name}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    {/* Online/Offline Icon */}
-                    <span
-                      className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 ${
-                        isOnline ? "bg-green-600" : "bg-gray-400"
-                      } border-black`}
-                      title={isOnline ? "Online" : "Offline"}
-                    ></span>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      {/* Profile Image */}
+                      <img
+                        src={employee.dp}
+                        alt={employee.name}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                      {/* Online/Offline Icon */}
+                      <span
+                        className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 ${
+                          isOnline ? "bg-green-600" : "bg-gray-400"
+                        } border-black`}
+                        title={isOnline ? "Online" : "Offline"}
+                      ></span>
+                    </div>
+                    <span className="text-base font-medium">
+                      {employee.name}
+                    </span>
                   </div>
-                  <span className="text-base font-medium">{employee.name}</span>
+
+                  {/* Unread Count Badge */}
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
