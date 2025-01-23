@@ -43,7 +43,6 @@ const ChatPanel = ({
       console.log("Attachment prepared:", attachment);
     };
 
-    console.log("after convert into base 64", attachment);
 
     reader.onerror = (error) => {
       console.error("File upload error:", error);
@@ -55,7 +54,6 @@ const ChatPanel = ({
   const handleSendMessage = (e) => {
     e.preventDefault();
 
-    console.log("hit");
     sendMessage({
       socket,
       selectedChannel,
@@ -97,7 +95,6 @@ const ChatPanel = ({
     }
   };
 
-  console.log("after send the attach,ejt and message", messages);
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">

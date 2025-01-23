@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const sendMessage = async ({
   socket,
   selectedChannel,
@@ -14,14 +12,6 @@ const sendMessage = async ({
   const member = JSON.parse(localStorage.getItem("member"));
   const userId = member?._id;
 
-  let attachmentUrl = null;
-
-  const response = await axios.get(
-    `${
-      import.meta.env.VITE_APP_BACKEND_URL
-    }api/employeeApp/getEmployeeById/${userId}`
-  );
-
   if (selectedChannel.conversationId) {
     // Send DM
     const recipientId = selectedChannel.employeeId;
@@ -35,15 +25,12 @@ const sendMessage = async ({
     if (attachment) {
       const filepath = `antschat/${Date.now()}.${attachment.name}`;
       filePath = filepath;
-      attachmentUrl = filepath;
     }
 
     const attachmentData = {
       attachment,
       filePath,
     };
-
-    console.log(" before message sent", attachment);
 
     socket.emit("send_dm", {
       senderId: userId,
@@ -54,7 +41,6 @@ const sendMessage = async ({
       attachmentData, // Send attachment path
     });
 
-    console.log("after message sent", attachment);
 
     // Remove any existing listener to avoid duplicates
     socket.off("recived_dm");
@@ -89,7 +75,6 @@ const sendMessage = async ({
       filePath,
     };
 
-    console.log(" before message sent", attachment);
 
     // Send Channel Message
     socket.emit("send_message", {

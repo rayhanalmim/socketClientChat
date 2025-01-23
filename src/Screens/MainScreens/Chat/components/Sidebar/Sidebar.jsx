@@ -16,7 +16,6 @@ const Sidebar = ({
   setChannels,
   setEmployees,
 }) => {
-  console.log("search", search);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -30,7 +29,6 @@ const Sidebar = ({
             params: { searchQuery: search },
           }
         );
-        console.log("channel data from sidebar:", data.channels);
         setChannels(data.channels);
         setEmployees(data.employees);
       } catch (error) {
@@ -42,7 +40,6 @@ const Sidebar = ({
     return () => clearTimeout(debounceTimeout);
   }, [search, setChannels, setEmployees]);
 
-  console.log(employees);
 
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
