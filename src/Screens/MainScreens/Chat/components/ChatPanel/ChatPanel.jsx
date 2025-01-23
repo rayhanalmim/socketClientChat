@@ -22,14 +22,10 @@ const ChatPanel = ({
   const [editedMessageContent, setEditedMessageContent] = useState("");
   const [attachment, setAttachment] = useState(null);
 
-  console.log("from chat", attachment);
-
-  console.log("hello this is the updated messege:", messages);
 
   const handleFileUpload = async (file) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    console.log("file form file handler upload", file);
     reader.onload = () => {
       const base64Data = reader.result.split(",")[1]; // Extract the Base64 data
       const attachment = {
@@ -40,7 +36,6 @@ const ChatPanel = ({
 
       // Update attachment state
       setAttachment(attachment);
-      console.log("Attachment prepared:", attachment);
     };
 
 
@@ -72,11 +67,10 @@ const ChatPanel = ({
         ? `api/message/group/${selectedChannel._id}/message/${messageId}`
         : `api/message/dm/${selectedChannel.conversationId}/message/${messageId}`;
 
-      const response = await axios.put(
+     await axios.put(
         `${import.meta.env.VITE_APP_BACKEND_URL}${endpoint}`,
         { content: newContent }
       );
-      console.log("Message updated successfully:", response.data);
 
       setEditingMessageId(null); // Reset edit state
     } catch (error) {
@@ -187,12 +181,6 @@ const ChatPanel = ({
                   {/* Attachment (if any) */}
                   {hasAttachment && (
                     <div className="mt-2">
-                      {console.log(
-                        "inside attchemt : ",
-                        `${import.meta.env.VITE_APP_SPACES_URL}${
-                          msg.attachment
-                        }`
-                      )}
                       <img
                         src={`${import.meta.env.VITE_APP_SPACES_URL}${
                           msg.attachment
