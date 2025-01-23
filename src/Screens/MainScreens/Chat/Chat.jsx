@@ -85,6 +85,8 @@ export default function Chat() {
 
       {/* Chat Panel */}
       <ChatPanel
+      socket={socket}
+      setMessages={setMessages}
         selectedChannel={selectedChannel}
         messages={messages}
         currentUser={currentUser}

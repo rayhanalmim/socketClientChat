@@ -4,22 +4,68 @@ import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxP
 import { IconPaperclip, IconSend, IconEdit } from "@tabler/icons-react";
 import { format } from "date-fns";
 import axios from "axios";
+import sendMessage from "../../utils/sendMessage";
 
 const ChatPanel = ({
   selectedChannel,
   messages,
+  socket,
+  setMessages,
   currentUser,
   typingUsers,
   messagesEndRef,
-  sendMessageHandler,
   newMessage,
   setNewMessage,
   handleTypingHandler,
 }) => {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editedMessageContent, setEditedMessageContent] = useState("");
+  const [attachment, setAttachment] = useState(null);
 
-  console.log("selected channel from chat panel:", selectedChannel);
+  console.log("from chat", attachment);
+
+  console.log("hello this is the updated messege:", messages);
+
+  const handleFileUpload = async (file) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    console.log("file form file handler upload", file);
+    reader.onload = () => {
+      const base64Data = reader.result.split(",")[1]; // Extract the Base64 data
+      const attachment = {
+        data: base64Data,
+        mimetype: file.type,
+        name: file.name,
+      };
+
+      // Update attachment state
+      setAttachment(attachment);
+      console.log("Attachment prepared:", attachment);
+    };
+
+    console.log("after convert into base 64", attachment);
+
+    reader.onerror = (error) => {
+      console.error("File upload error:", error);
+      setAttachment(null); // Clear attachment on error
+    };
+  };
+
+  // The sendMessageHandler now needs to pass the attachment state as well
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+
+    console.log("hit");
+    sendMessage({
+      socket,
+      selectedChannel,
+      newMessage,
+      setMessages,
+      setNewMessage,
+      attachment,
+      setAttachment,
+    });
+  };
 
   // Update message content function
   const updateMessage = async (messageId, newContent) => {
@@ -51,6 +97,8 @@ const ChatPanel = ({
     }
   };
 
+  console.log("after send the attach,ejt and message", messages);
+
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
       {/* Chat Header */}
@@ -68,7 +116,10 @@ const ChatPanel = ({
       {/* Chat Messages */}
       <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((msg, index) => {
-          if (!msg?.content.trim()) return null; // Skip empty messages
+          // Skip entirely empty messages
+          const hasContent = msg?.content?.trim();
+          const hasAttachment = msg?.attachment;
+          if (!hasContent && !hasAttachment) return null;
 
           const isSender =
             msg.senderId === JSON.parse(localStorage.getItem("member"))?._id;
@@ -76,12 +127,12 @@ const ChatPanel = ({
 
           return (
             <div
-              key={index}
+              key={msg._id || index}
               className={`relative flex ${
                 isSender ? "justify-end" : "justify-start"
               } mb-4`}
             >
-              {/* User Image */}
+              {/* User Image (for received messages) */}
               {!isSender && msg.senderImage && (
                 <img
                   src={msg.senderImage}
@@ -91,10 +142,7 @@ const ChatPanel = ({
               )}
 
               {/* Parent Wrapper */}
-              <div
-                className="group relative flex items-center space-x-2"
-                style={{ background: "none" }}
-              >
+              <div className="group relative flex items-center space-x-2">
                 {/* Message Bubble */}
                 <div
                   className={`relative max-w-72 px-3 py-2 shadow-lg ${
@@ -103,7 +151,8 @@ const ChatPanel = ({
                       : "rounded-[16px_16px_16px_0] bg-slate-900 text-gray-200"
                   }`}
                 >
-                  <div className="flex items-center space-x-2">
+                  {/* Sender Name and Timestamp */}
+                  <div className="flex items-center space-x-2 mb-1">
                     <span className="text-sm font-semibold text-white">
                       {msg?.senderName}
                     </span>
@@ -113,7 +162,7 @@ const ChatPanel = ({
                     </span>
                   </div>
 
-                  {/* Editable Message Content */}
+                  {/* Message Content */}
                   {editingMessageId === msg._id ? (
                     <div>
                       <textarea
@@ -131,27 +180,34 @@ const ChatPanel = ({
                       </button>
                     </div>
                   ) : (
-                    <div className="text-gray-400">{msg?.content}</div>
+                    hasContent && (
+                      <div className="text-gray-400 break-words">
+                        {msg.content}
+                      </div>
+                    )
                   )}
 
-                  {msg.attachments?.length > 0 && (
+                  {/* Attachment (if any) */}
+                  {hasAttachment && (
                     <div className="mt-2">
-                      {msg.attachments.map((attachment, idx) => (
-                        <a
-                          key={idx}
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 underline"
-                        >
-                          {attachment.name || "Attachment"}
-                        </a>
-                      ))}
+                      {console.log(
+                        "inside attchemt : ",
+                        `${import.meta.env.VITE_APP_SPACES_URL}${
+                          msg.attachment
+                        }`
+                      )}
+                      <img
+                        src={`${import.meta.env.VITE_APP_SPACES_URL}${
+                          msg.attachment
+                        }`}
+                        alt="Attachment"
+                        className="rounded-lg max-h-40 object-cover"
+                      />
                     </div>
                   )}
                 </div>
 
-                {/* Edit Button */}
+                {/* Edit Button (for sender's messages) */}
                 {isSender && !editingMessageId && (
                   <button
                     onClick={() =>
@@ -167,7 +223,7 @@ const ChatPanel = ({
                 )}
               </div>
 
-              {/* Sender Image for Sent Messages */}
+              {/* Sender Image (for sent messages) */}
               {isSender && msg.senderImage && (
                 <img
                   src={msg.senderImage}
@@ -200,22 +256,51 @@ const ChatPanel = ({
       </div>
 
       {/* Message Input */}
-      <form className="flex gap-2 p-4" onSubmit={sendMessageHandler}>
+      <form className="flex gap-2 p-4" onSubmit={handleSendMessage}>
         <div className="flex flex-1 items-center gap-2 rounded-md border px-2 py-1">
           <div className="space-x-1">
-            <Button size="icon" type="button" variant="ghost">
+            {/* File Input for Attachments */}
+            <label
+              htmlFor="attachment"
+              className="cursor-pointer flex items-center gap-2"
+            >
               <IconPaperclip size={20} />
-            </Button>
+              <input
+                id="attachment"
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  handleFileUpload(file);
+                  e.target.value = ""; // Reset the input value to allow re-selection of the same file
+                }}
+              />
+            </label>
           </div>
+
+          {/* Display Selected Attachment */}
+          {attachment && (
+            <div className="flex items-center gap-2 bg-gray-200 p-2 rounded-md">
+              <span className="text-sm text-gray-800">{attachment.name}</span>
+              <button
+                type="button"
+                onClick={() => setAttachment(null)}
+                className="text-red-500 hover:text-red-700"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <input
             type="text"
             placeholder="Type your message..."
             className="flex-1 bg-inherit"
             value={newMessage}
             onChange={(e) => {
-              setNewMessage(e.target.value); // Update message state
-              handleTypingHandler(e); // Trigger typing event on every input change
-            }} // Detect typing when input is focused
+              setNewMessage(e.target.value);
+              handleTypingHandler(e);
+            }}
           />
           <Button type="submit" size="icon" variant="ghost">
             <IconSend size={20} />
