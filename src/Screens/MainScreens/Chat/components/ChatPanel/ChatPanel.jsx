@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { IconPaperclip, IconSend, IconEdit } from "@tabler/icons-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import axios from "axios";
 import sendMessage from "../../utils/sendMessage";
 
@@ -22,7 +22,6 @@ const ChatPanel = ({
   const [editedMessageContent, setEditedMessageContent] = useState("");
   const [attachment, setAttachment] = useState(null);
 
-
   const handleFileUpload = async (file) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -37,7 +36,6 @@ const ChatPanel = ({
       // Update attachment state
       setAttachment(attachment);
     };
-
 
     reader.onerror = (error) => {
       console.error("File upload error:", error);
@@ -67,10 +65,9 @@ const ChatPanel = ({
         ? `api/message/group/${selectedChannel._id}/message/${messageId}`
         : `api/message/dm/${selectedChannel.conversationId}/message/${messageId}`;
 
-     await axios.put(
-        `${import.meta.env.VITE_APP_BACKEND_URL}${endpoint}`,
-        { content: newContent }
-      );
+      await axios.put(`${import.meta.env.VITE_APP_BACKEND_URL}${endpoint}`, {
+        content: newContent,
+      });
 
       setEditingMessageId(null); // Reset edit state
     } catch (error) {
@@ -89,6 +86,7 @@ const ChatPanel = ({
     }
   };
 
+  console.log(selectedChannel);
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -96,10 +94,34 @@ const ChatPanel = ({
       <div className="mb-1 flex justify-between bg-secondary p-4 shadow-lg">
         <div className="flex gap-3">
           <div>
+            {/* Channel Name */}
             <span className="text-sm font-medium">{selectedChannel?.name}</span>
+            {/* Channel Description */}
             <span className="block text-xs text-muted-foreground">
-              {selectedChannel?.description}
+              {!selectedChannel?.conversationId && selectedChannel?.description}
             </span>
+            {/* Presence Status */}
+            {selectedChannel?.conversationId ? (
+              selectedChannel?.presence?.status === "online" ? (
+                <span className="block text-xs text-green-500">Active now</span>
+              ) : (
+                <span className="block text-xs text-muted-foreground">
+                  Last seen:{" "}
+                  {selectedChannel?.presence?.lastSeen
+                    ? formatDistanceToNow(
+                        new Date(Number(selectedChannel.presence.lastSeen)),
+                        {
+                          addSuffix: true,
+                        }
+                      )
+                    : "Unavailable"}
+                </span>
+              )
+            ) : (
+              <span className="block text-xs text-muted-foreground">
+                Not currently active
+              </span>
+            )}
           </div>
         </div>
       </div>

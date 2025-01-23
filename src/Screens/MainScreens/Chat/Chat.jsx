@@ -65,7 +65,7 @@ export default function Chat() {
   };
 
   const handleSelectChannelHandler = (employee) => {
-    handleSelectChannel(employee, setConversationId, setSelectedChannel);
+    handleSelectChannel(employee, setConversationId, setSelectedChannel,socket);
   };
 
   return (
@@ -74,6 +74,7 @@ export default function Chat() {
       <Sidebar
         search={search}
         setSearch={setSearch}
+        socket={socket}
         setChannels={setChannels}
         setEmployees={setEmployees}
         channels={channels}

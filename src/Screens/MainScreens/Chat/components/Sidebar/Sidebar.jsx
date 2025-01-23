@@ -3,7 +3,8 @@
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { IconMessages, IconSearch } from "@tabler/icons-react";
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import useSocket from "../../Hooks/useSocket";
 
 const Sidebar = ({
   search,
@@ -16,6 +17,8 @@ const Sidebar = ({
   setChannels,
   setEmployees,
 }) => {
+  const socket = useSocket();
+  const [userPresence, setUserPresence] = useState({});
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -40,6 +43,31 @@ const Sidebar = ({
     return () => clearTimeout(debounceTimeout);
   }, [search, setChannels, setEmployees]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    // Fetch initial presence data
+    socket.on("all_users_presence", (presenceData) => {
+      const presenceMap = {};
+      presenceData.forEach((user) => {
+        presenceMap[user.userId] = user.status;
+      });
+      setUserPresence(presenceMap);
+    });
+
+    // Listen for presence updates
+    socket.on("user_presence_updated", ({ userId, status }) => {
+      setUserPresence((prevPresence) => ({
+        ...prevPresence,
+        [userId]: status,
+      }));
+    });
+
+    return () => {
+      socket.off("all_users_presence");
+      socket.off("user_presence_updated");
+    };
+  }, [socket]);
 
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
@@ -90,30 +118,43 @@ const Sidebar = ({
         <div className="flex-1 overflow-auto">
           <h2 className="text-lg font-semibold px-4 mb-3">Direct Messages</h2>
           <div className="flex flex-col gap-2 overflow-y-auto">
-            {employees.map((employee) => (
-              <button
-                key={employee._id}
-                className={`flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors ${
-                  selectedChannel?.conversationId ===
-                  [
-                    JSON.parse(localStorage.getItem("member"))?._id,
-                    employee._id,
-                  ]
-                    .sort()
-                    .join("_")
-                    ? " text-white border border-white rounded"
-                    : " text-gray-500 hover:bg-muted"
-                }`}
-                onClick={() => handleSelectChannelHandler(employee)}
-              >
-                <img
-                  src={employee.dp}
-                  alt={employee.name}
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-                <span className="text-base font-medium">{employee.name}</span>
-              </button>
-            ))}
+            {employees.map((employee) => {
+              const isOnline = userPresence[employee._id] === "online";
+              return (
+                <button
+                  key={employee._id}
+                  className={`flex items-center gap-3 px-3 py-1.5 rounded-md transition-colors ${
+                    selectedChannel?.conversationId ===
+                    [
+                      JSON.parse(localStorage.getItem("member"))?._id,
+                      employee._id,
+                    ]
+                      .sort()
+                      .join("_")
+                      ? "text-white border border-white rounded "
+                      : "text-gray-300 hover:bg-muted hover:bg-slate-700 "
+                  }`}
+                  onClick={() => handleSelectChannelHandler(employee)}
+                >
+                  <div className="relative">
+                    {/* Profile Image */}
+                    <img
+                      src={employee.dp}
+                      alt={employee.name}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                    {/* Online/Offline Icon */}
+                    <span
+                      className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 ${
+                        isOnline ? "bg-green-600" : "bg-gray-400"
+                      } border-black`}
+                      title={isOnline ? "Online" : "Offline"}
+                    ></span>
+                  </div>
+                  <span className="text-base font-medium">{employee.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
