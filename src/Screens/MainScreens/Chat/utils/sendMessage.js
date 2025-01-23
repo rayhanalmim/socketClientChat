@@ -9,23 +9,18 @@ const sendMessage = async ({
   setNewMessage,
   attachment, // New argument to handle the file
 }) => {
- 
-
-  console.log('hit send message', attachment)
+  console.log("hit send message", attachment);
 
   const member = JSON.parse(localStorage.getItem("member"));
   const userId = member?._id;
 
   let attachmentUrl = null;
 
-  const response = await axios.get(`${import.meta.env.VITE_APP_BACKEND_URL}api/employeeApp/getEmployeeById/${userId}`);
-
-  // Prepare attachment data if any
-  // let attachmentData = null;
-  // if (attachment) {
-  //   const filePath = `antschat/${Date.now()}-${attachment.name}`;
-  //   attachmentData = filePath; // Pass only the file path to the backend (no actual file upload here)
-  // }
+  const response = await axios.get(
+    `${
+      import.meta.env.VITE_APP_BACKEND_URL
+    }api/employeeApp/getEmployeeById/${userId}`
+  );
 
   if (selectedChannel.conversationId) {
     // Send DM
@@ -37,7 +32,7 @@ const sendMessage = async ({
 
     let filePath = null;
 
-    if(attachment){
+    if (attachment) {
       const filepath = `antschat/${Date.now()}.${attachment.name}`;
       filePath = filepath;
       attachmentUrl = filepath;
@@ -45,10 +40,10 @@ const sendMessage = async ({
 
     const attachmentData = {
       attachment,
-      filePath
-    }
+      filePath,
+    };
 
-    console.log(' before message sent', attachment)
+    console.log(" before message sent", attachment);
 
     socket.emit("send_dm", {
       senderId: userId,
@@ -59,7 +54,28 @@ const sendMessage = async ({
       attachmentData, // Send attachment path
     });
 
-    console.log("after message sent", attachment)
+    console.log("after message sent", attachment);
+
+    // Remove any existing listener to avoid duplicates
+    socket.off("recived_dm");
+
+    // Listen for the updated message after it is saved and pushed to the channel
+    socket.on("recived_dm", (message) => {
+      setMessages((prevMessages) => {
+        // Append the new message to the existing messages
+        return [
+          ...prevMessages,
+          {
+            senderId: message.senderId, // sender ID from the message data
+            senderImage: message.senderImage, // sender's image URL from the message data
+            senderName: message.senderName, // sender's name from the message data
+            content: message.content, // the content of the message
+            attachment: message.attachment, // the attachment URL if any
+            createdAt: new Date().toISOString(), // timestamp of when the message was received
+          }
+        ];
+      });
+    });
     
   } else {
     // Send Channel Message
@@ -71,24 +87,36 @@ const sendMessage = async ({
       attachment, // Send attachment path
       timestamp: new Date().toISOString(),
     });
-  }
 
-  // Update the local messages state with the new message
-  setMessages((prev) => [
-    ...prev,
-    {
-      senderId: userId,
-      senderImage: response.data.dp,
-      senderName: member.name,
-      content: newMessage.trim(),
-      attachment: attachmentUrl, // Include the attachment path in the state
-      createdAt: new Date().toISOString(),
-    },
-  ]);
+    // Remove any existing listener to avoid duplicates
+    socket.off("receive_message");
+
+    // Listen for the updated message and update the state
+    socket.on("receive_message", (message) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          senderId: userId,
+          senderImage: response.data.dp,
+          senderName: member.name,
+          content: newMessage.trim(),
+          attachment: message.attachment, // Handle the attachment URL from the received message
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    });
+  }
 
   // Clear the input fields after sending
   setNewMessage("");
   setAttachment(null); // Reset attachment after sending
+
+  return () => {
+    // Remove listeners to avoid memory leaks
+    socket.off("recived_dm");
+    socket.off("send_dm");
+    socket.off("receive_message");
+  };
 };
 
 export default sendMessage;
