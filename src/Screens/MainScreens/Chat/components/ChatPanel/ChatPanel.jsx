@@ -86,7 +86,7 @@ const ChatPanel = ({
     }
   };
 
-  console.log(selectedChannel);
+  console.log(typingUsers);
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">

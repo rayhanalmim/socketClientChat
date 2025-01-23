@@ -13,13 +13,14 @@ export const handleSelectChannel = (
 
   // Listen for the presence response
   socket.on("user_presence_status", ({  status, lastSeen }) => {
-    setSelectedChannel((prevChannel) => ({
-      ...prevChannel,
+    setSelectedChannel({
       name: employee.name,
       employeeId: employee._id,
       conversationId,
       description: "Direct message",
       presence: { status, lastSeen }, // Add presence info
-    }));
+    });
   });
 };
+
+
