@@ -78,6 +78,21 @@ const sendMessage = async ({
     });
     
   } else {
+
+    let filePath = null;
+
+    if (attachment) {
+      const filepath = `antschat/${Date.now()}.${attachment.name}`;
+      filePath = filepath;
+    }
+
+    const attachmentData = {
+      attachment,
+      filePath,
+    };
+
+    console.log(" before message sent", attachment);
+
     // Send Channel Message
     socket.emit("send_message", {
       channelId: selectedChannel._id,
@@ -85,6 +100,7 @@ const sendMessage = async ({
       userId,
       messageType: "text",
       attachment, // Send attachment path
+      attachmentData,
       timestamp: new Date().toISOString(),
     });
 
