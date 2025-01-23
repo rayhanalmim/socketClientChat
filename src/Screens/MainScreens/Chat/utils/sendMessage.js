@@ -71,14 +71,12 @@ const sendMessage = async ({
             senderName: message.senderName, // sender's name from the message data
             content: message.content, // the content of the message
             attachment: message.attachment, // the attachment URL if any
-            createdAt: new Date().toISOString(), // timestamp of when the message was received
-          }
+            createdAt: message.createdAt, // timestamp of when the message was received
+          },
         ];
       });
     });
-    
   } else {
-
     let filePath = null;
 
     if (attachment) {
@@ -106,20 +104,22 @@ const sendMessage = async ({
 
     // Remove any existing listener to avoid duplicates
     socket.off("receive_message");
+ 
 
-    // Listen for the updated message and update the state
     socket.on("receive_message", (message) => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          senderId: userId,
-          senderImage: response.data.dp,
-          senderName: member.name,
-          content: newMessage.trim(),
-          attachment: message.attachment, // Handle the attachment URL from the received message
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      setMessages((prevMessages) => {
+        return [
+          ...prevMessages,
+          {
+            senderId: message.senderId,
+            senderImage: message.senderImage,
+            senderName: message.senderName,
+            content: message.content,
+            attachment: message.attachment, // Handle the attachment URL from the received message
+            createdAt: message.createdAt,
+          },
+        ];
+      });
     });
   }
 
