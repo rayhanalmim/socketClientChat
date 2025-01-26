@@ -11,8 +11,8 @@ const useChatListeners = ({
       const member = JSON.parse(localStorage.getItem('member'));
       const userId = member?._id;
       socket.emit('user_online', { userId });
-      // New message listener
-      const dmMessegeListener = (data) => {
+
+      const dmMessageListener = (data) => {
         setMessages((prev) => {
           if (userId === data.senderId) {
             return prev; // Ignore messages sent by the same user
@@ -21,20 +21,12 @@ const useChatListeners = ({
         });
       };
 
+      // Leave the previous channel if switching to a new one
       if (selectedChannel.conversationId) {
-        // Direct Message logic
-
-        // Leave the previous channel
+        // If the user is switching conversations, leave the previous DM channel
         if (selectedChannel._id) {
-          socket.emit('leave_channel', {
-            channelId: selectedChannel._id,
-            userId,
-          });
+          socket.emit('leave_dm', { conversationId: selectedChannel._id });
         }
-
-        // socket.emit('leave_dm', {
-        //   conversationId : selectedChannel.conversationId,
-        // });
 
         socket.emit('join_dm', {
           conversationId: selectedChannel.conversationId,
@@ -44,9 +36,9 @@ const useChatListeners = ({
           setMessages(data.reverse());
         });
 
-        socket.on('recived_dm', dmMessegeListener);
+        socket.on('recived_dm', dmMessageListener);
       } else {
-        // Leave the previous channel
+        // Handle leaving and joining the channel (for non-DM channels)
         if (selectedChannel._id) {
           socket.emit('leave_channel', {
             channelId: selectedChannel._id,
@@ -54,7 +46,6 @@ const useChatListeners = ({
           });
         }
 
-        // Join the new channel
         socket.emit('join_channel', { channelId: selectedChannel._id, userId });
       }
 
@@ -89,7 +80,6 @@ const useChatListeners = ({
       };
 
       // Register all listeners
-
       socket.on('error', errorListener);
       socket.on('message_history', messageHistoryListener);
       socket.on('receive_message', messageListener);
@@ -100,7 +90,7 @@ const useChatListeners = ({
         // Remove listeners to avoid memory leaks
         socket.off('user_online');
         socket.off('private_message_history');
-        socket.off('send_dm', dmMessegeListener);
+        socket.off('send_dm', dmMessageListener);
         socket.off('recived_dm');
         socket.off('error', errorListener);
         socket.off('message_history', messageHistoryListener);
@@ -109,7 +99,6 @@ const useChatListeners = ({
         socket.off('stop_typing', stopTypingListener);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, selectedChannel]);
 };
 
