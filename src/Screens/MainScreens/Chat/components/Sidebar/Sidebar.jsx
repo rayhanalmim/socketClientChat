@@ -23,6 +23,7 @@ const Sidebar = ({
   useEffect(() => {
     const fetchSearchResults = async () => {
       const member = JSON.parse(localStorage.getItem("member"));
+
       try {
         const { data } = await axios.get(
           `${import.meta.env.VITE_APP_BACKEND_URL}api/channel/search/${
@@ -45,7 +46,7 @@ const Sidebar = ({
 
   useEffect(() => {
     if (!socket) return;
-
+    const user = JSON.parse(localStorage.getItem("member"));
     // Fetch initial presence data
     socket.on("all_users_presence", (presenceData) => {
       const presenceMap = {};
@@ -54,6 +55,8 @@ const Sidebar = ({
       });
       setUserPresence(presenceMap);
     });
+
+    socket.emit("fetch_unread_counts", { userId: user._id });
 
     // Listen for presence updates
     socket.on("user_presence_updated", ({ userId, status }) => {
@@ -71,17 +74,17 @@ const Sidebar = ({
     });
 
     // Listen for unread count updates
-    socket.on("unread_count", ({ conversationId, count }) => {
-      setUnreadCounts((prevCounts) => ({
-        ...prevCounts,
-        [conversationId]: count,
-      }));
+    socket.on("unread_counts", (data) => {
+      console.log(
+        "unread count resopxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        data
+      );
     });
 
     return () => {
       socket.off("all_users_presence");
       socket.off("user_presence_updated");
-      socket.off("unread_count");
+      socket.off("unread_counts");
     };
   }, [socket, employees]);
 
@@ -90,7 +93,7 @@ const Sidebar = ({
     const conversationId = [member._id, employee._id].sort().join("_");
 
     // Reset unread count for the selected channel (marking messages as read)
-    socket.emit("message_read", { userId: member._id, conversationId });
+    // socket.emit("message_read", { userId: member._id, conversationId });
 
     // Immediately update the unread count on the frontend to 0
     setUnreadCounts((prevCounts) => ({

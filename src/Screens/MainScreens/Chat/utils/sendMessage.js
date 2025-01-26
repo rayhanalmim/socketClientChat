@@ -41,13 +41,11 @@ const sendMessage = async ({
       attachmentData, // Send attachment path
     });
 
-      // Emit an event to update the unread count for the recipient
-      socket.emit("fetch_unread_count", {
-        userId: recipientId,
-        conversationId: selectedChannel.conversationId,
-      });
-  
-
+    // Emit an event to update the unread count for the recipient
+    socket.emit("fetch_unread_counts", {
+      userId: recipientId,
+      conversationId: selectedChannel.conversationId,
+    });
 
     // Remove any existing listener to avoid duplicates
     socket.off("recived_dm");
@@ -82,7 +80,6 @@ const sendMessage = async ({
       filePath,
     };
 
-
     // Send Channel Message
     socket.emit("send_message", {
       channelId: selectedChannel._id,
@@ -96,7 +93,6 @@ const sendMessage = async ({
 
     // Remove any existing listener to avoid duplicates
     socket.off("receive_message");
- 
 
     socket.on("receive_message", (message) => {
       setMessages((prevMessages) => {

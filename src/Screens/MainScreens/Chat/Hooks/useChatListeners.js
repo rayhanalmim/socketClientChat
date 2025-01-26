@@ -32,6 +32,10 @@ const useChatListeners = ({
           });
         }
 
+        // socket.emit('leave_dm', {
+        //   conversationId : selectedChannel.conversationId,
+        // });
+
         socket.emit('join_dm', {
           conversationId: selectedChannel.conversationId,
         });
@@ -76,8 +80,8 @@ const useChatListeners = ({
       };
 
       // Typing indicator listeners
-      const typingListener = ({ userId, name }) => {
-        setTypingUsers((prev) => [...prev, { userId, name }]);
+      const typingListener = ({ userId, name, conversationId, channelId }) => {
+        setTypingUsers((prev) => [...prev, { userId, name, conversationId, channelId }]);
       };
 
       const stopTypingListener = ({ userId }) => {
