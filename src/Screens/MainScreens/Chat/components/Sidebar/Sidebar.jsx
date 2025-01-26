@@ -206,7 +206,7 @@ const Sidebar = ({
                     </div>
                     <div className="flex flex-col gap-1">
                       <span className="text-base font-medium">
-                        {employee.name.trim()}
+                        {employee.name.trim(" ")}
                       </span>
                       <span className="text-sm text-gray-500">
                         {lastMessage}
