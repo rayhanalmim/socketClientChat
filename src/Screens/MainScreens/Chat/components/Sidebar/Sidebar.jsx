@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { IconMessages, IconSearch } from "@tabler/icons-react";
 import axios from "axios";
@@ -19,6 +18,7 @@ const Sidebar = ({
   const socket = useSocket();
   const [userPresence, setUserPresence] = useState({});
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [lastMessages, setLastMessages] = useState({}); // To store the last message for each conversation
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -61,40 +61,33 @@ const Sidebar = ({
     // Fetch initial unread counts
     socket.emit("fetch_unread_counts", { userId: user._id });
 
-    // Listen for unread counts updates (real-time)
+    // Listen for unread counts and last messages updates (real-time)
     socket.on("unread_counts", (data) => {
-      console.log("Received unread counts:", data);
-
-      // Update the unread counts
-      setUnreadCounts((prevCounts) => {
-        const updatedCounts = { ...prevCounts };
-        Object.keys(data).forEach((key) => {
-          if (data[key].conversationId) {
-            updatedCounts[data[key].conversationId] = parseInt(
-              data[key].count,
-              10
-            );
-          }
+      if (Array.isArray(data)) {
+        data.forEach((conversation) => {
+          const { conversationId, count, lastMessage, lastMessageTime } =
+            conversation;
+          setUnreadCounts((prevCounts) => ({
+            ...prevCounts,
+            [conversationId]: count,
+          }));
+          setLastMessages((prevMessages) => ({
+            ...prevMessages,
+            [conversationId]: { message: lastMessage, time: lastMessageTime },
+          }));
         });
-        console.log("Updated unread counts:", updatedCounts); // Check updated counts in console
-        return updatedCounts; // Ensure state update triggers re-render
-      });
-    });
-
-    // Listen for real-time DM updates
-    socket.on("recived_dm", (message) => {
-      console.log("Received new DM:", message);
-
-      setUnreadCounts((prevCounts) => {
-        // Create a new object by spreading the previous counts to avoid direct mutation
-        const updatedCounts = { ...prevCounts };
-
-        // Ensure the count is numeric and update the unread count for the given conversationId
-        updatedCounts[message.conversationId] =
-          (updatedCounts[message.conversationId] || 0) + 1;
-
-        return updatedCounts;
-      });
+      } else if (data.conversationId) {
+        // If it's a single message update
+        const { conversationId, count, lastMessage, lastMessageTime } = data;
+        setUnreadCounts((prevCounts) => ({
+          ...prevCounts,
+          [conversationId]: count,
+        }));
+        setLastMessages((prevMessages) => ({
+          ...prevMessages,
+          [conversationId]: { message: lastMessage, time: lastMessageTime },
+        }));
+      }
     });
 
     return () => {
@@ -108,11 +101,17 @@ const Sidebar = ({
     const member = JSON.parse(localStorage.getItem("member"));
     const conversationId = [member._id, employee._id].sort().join("_");
 
-    // Reset unread count for the selected channel
+    // Reset unread count for the selected channel locally
     setUnreadCounts((prevCounts) => ({
       ...prevCounts,
       [conversationId]: 0,
     }));
+
+    // Emit the 'message_read' event to the server to reset the unread count
+    socket.emit("message_read", {
+      userId: member._id,
+      conversationId,
+    });
 
     // Call the handler for selecting a channel
     handleSelectChannelHandler(employee);
@@ -176,6 +175,8 @@ const Sidebar = ({
                 .join("_");
               const unreadCount = unreadCounts[conversationId] || 0;
               const isOnline = userPresence[employee._id] === "online";
+              const lastMessage = lastMessages[conversationId]?.message;
+              const lastMessageTime = lastMessages[conversationId]?.time;
 
               return (
                 <button
@@ -187,7 +188,7 @@ const Sidebar = ({
                   }`}
                   onClick={() => handleChannelClick(employee)}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-3 w-full">
                     <div className="relative">
                       {/* Profile Image */}
                       <img
@@ -203,17 +204,27 @@ const Sidebar = ({
                         title={isOnline ? "Online" : "Offline"}
                       ></span>
                     </div>
-                    <span className="text-base font-medium">
-                      {employee.name}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-base font-medium">
+                        {employee.name.trim()}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {lastMessage}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 ml-auto">
+                      <span className="text-xs text-gray-400">
+                        {lastMessageTime
+                          ? new Date(lastMessageTime).toLocaleTimeString()
+                          : ""}
+                      </span>
+                      {unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Unread Count Badge */}
-                  {unreadCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
                 </button>
               );
             })}
