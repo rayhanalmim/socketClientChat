@@ -18,7 +18,7 @@ const Sidebar = ({
 }) => {
   const socket = useSocket();
   const [userPresence, setUserPresence] = useState({});
-  const [unreadCounts, setUnreadCounts] = useState({}); // Store unread counts for each employee
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -46,8 +46,10 @@ const Sidebar = ({
 
   useEffect(() => {
     if (!socket) return;
+
     const user = JSON.parse(localStorage.getItem("member"));
-    // Fetch initial presence data
+
+    // Fetch presence data
     socket.on("all_users_presence", (presenceData) => {
       const presenceMap = {};
       presenceData.forEach((user) => {
@@ -56,46 +58,57 @@ const Sidebar = ({
       setUserPresence(presenceMap);
     });
 
+    // Fetch initial unread counts
     socket.emit("fetch_unread_counts", { userId: user._id });
 
-    // Listen for presence updates
-    socket.on("user_presence_updated", ({ userId, status }) => {
-      setUserPresence((prevPresence) => ({
-        ...prevPresence,
-        [userId]: status,
-      }));
-    });
-
-    // Fetch unread message count for each employee
-    const member = JSON.parse(localStorage.getItem("member"));
-    employees.forEach((employee) => {
-      const conversationId = [member._id, employee._id].sort().join("_");
-      socket.emit("fetch_unread_count", { userId: member._id, conversationId });
-    });
-
-    // Listen for unread count updates
+    // Listen for unread counts updates (real-time)
     socket.on("unread_counts", (data) => {
-      console.log(
-        "unread count resopxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-        data
-      );
+      console.log("Received unread counts:", data);
+
+      // Update the unread counts
+      setUnreadCounts((prevCounts) => {
+        const updatedCounts = { ...prevCounts };
+        Object.keys(data).forEach((key) => {
+          if (data[key].conversationId) {
+            updatedCounts[data[key].conversationId] = parseInt(
+              data[key].count,
+              10
+            );
+          }
+        });
+        console.log("Updated unread counts:", updatedCounts); // Check updated counts in console
+        return updatedCounts; // Ensure state update triggers re-render
+      });
+    });
+
+    // Listen for real-time DM updates
+    socket.on("recived_dm", (message) => {
+      console.log("Received new DM:", message);
+
+      setUnreadCounts((prevCounts) => {
+        // Create a new object by spreading the previous counts to avoid direct mutation
+        const updatedCounts = { ...prevCounts };
+
+        // Ensure the count is numeric and update the unread count for the given conversationId
+        updatedCounts[message.conversationId] =
+          (updatedCounts[message.conversationId] || 0) + 1;
+
+        return updatedCounts;
+      });
     });
 
     return () => {
       socket.off("all_users_presence");
-      socket.off("user_presence_updated");
       socket.off("unread_counts");
+      socket.off("recived_dm");
     };
-  }, [socket, employees]);
+  }, [socket]);
 
   const handleChannelClick = (employee) => {
     const member = JSON.parse(localStorage.getItem("member"));
     const conversationId = [member._id, employee._id].sort().join("_");
 
-    // Reset unread count for the selected channel (marking messages as read)
-    // socket.emit("message_read", { userId: member._id, conversationId });
-
-    // Immediately update the unread count on the frontend to 0
+    // Reset unread count for the selected channel
     setUnreadCounts((prevCounts) => ({
       ...prevCounts,
       [conversationId]: 0,
@@ -104,6 +117,8 @@ const Sidebar = ({
     // Call the handler for selecting a channel
     handleSelectChannelHandler(employee);
   };
+
+  console.log("unread", unreadCounts);
 
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
@@ -164,7 +179,7 @@ const Sidebar = ({
 
               return (
                 <button
-                  key={employee._id}
+                  key={conversationId} // Use conversationId as key to ensure uniqueness
                   className={`flex items-center justify-between gap-3 px-3 py-1.5 rounded-md transition-colors ${
                     selectedChannel?.conversationId === conversationId
                       ? "text-white border border-white rounded "

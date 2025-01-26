@@ -5,18 +5,19 @@ const sendMessage = async ({
   setAttachment,
   setMessages,
   setNewMessage,
-  attachment, // New argument to handle the file
+  attachment,
 }) => {
-  console.log("hit send message", attachment);
+  console.log("Sending message:", attachment);
 
   const member = JSON.parse(localStorage.getItem("member"));
   const userId = member?._id;
 
   if (selectedChannel.conversationId) {
-    // Send DM
+    // Sending a direct message
     const recipientId = selectedChannel.employeeId;
+
     if (!recipientId) {
-      console.error("Recipient ID could not be determined.");
+      console.error("Recipient ID is undefined.");
       return;
     }
 
@@ -38,36 +39,26 @@ const sendMessage = async ({
       messageType: "text",
       recipientId,
       content: newMessage.trim(),
-      attachmentData, // Send attachment path
+      attachmentData,
     });
 
-    // Emit an event to update the unread count for the recipient
-    socket.emit("fetch_unread_counts", {
-      userId: recipientId,
-      conversationId: selectedChannel.conversationId,
-    });
-
-    // Remove any existing listener to avoid duplicates
-    socket.off("recived_dm");
-
-    // Listen for the updated message after it is saved and pushed to the channel
+    // Listen for the real-time message event
+    socket.off("recived_dm"); // Remove any existing listener to avoid duplicates
     socket.on("recived_dm", (message) => {
-      setMessages((prevMessages) => {
-        // Append the new message to the existing messages
-        return [
-          ...prevMessages,
-          {
-            senderId: message.senderId, // sender ID from the message data
-            senderImage: message.senderImage, // sender's image URL from the message data
-            senderName: message.senderName, // sender's name from the message data
-            content: message.content, // the content of the message
-            attachment: message.attachment, // the attachment URL if any
-            createdAt: message.createdAt, // timestamp of when the message was received
-          },
-        ];
-      });
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          senderId: message.senderId,
+          senderImage: message.senderImage,
+          senderName: message.senderName,
+          content: message.content,
+          attachment: message.attachment,
+          createdAt: message.createdAt,
+        },
+      ]);
     });
   } else {
+    // Sending a channel message
     let filePath = null;
 
     if (attachment) {
@@ -80,47 +71,41 @@ const sendMessage = async ({
       filePath,
     };
 
-    // Send Channel Message
     socket.emit("send_message", {
       channelId: selectedChannel._id,
       content: newMessage.trim(),
       userId,
       messageType: "text",
-      attachment, // Send attachment path
       attachmentData,
       timestamp: new Date().toISOString(),
     });
 
-    // Remove any existing listener to avoid duplicates
     socket.off("receive_message");
-
     socket.on("receive_message", (message) => {
-      setMessages((prevMessages) => {
-        return [
-          ...prevMessages,
-          {
-            senderId: message.senderId,
-            senderImage: message.senderImage,
-            senderName: message.senderName,
-            content: message.content,
-            attachment: message.attachment, // Handle the attachment URL from the received message
-            createdAt: message.createdAt,
-          },
-        ];
-      });
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          senderId: message.senderId,
+          senderImage: message.senderImage,
+          senderName: message.senderName,
+          content: message.content,
+          attachment: message.attachment,
+          createdAt: message.createdAt,
+        },
+      ]);
     });
   }
 
-  // Clear the input fields after sending
+  // Clear input and attachment fields
   setNewMessage("");
-  setAttachment(null); // Reset attachment after sending
+  setAttachment(null);
 
   return () => {
-    // Remove listeners to avoid memory leaks
     socket.off("recived_dm");
     socket.off("send_dm");
     socket.off("receive_message");
   };
 };
+
 
 export default sendMessage;
