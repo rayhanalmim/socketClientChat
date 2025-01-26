@@ -179,58 +179,58 @@ const Sidebar = ({
               const lastMessage = lastMessages[conversationId]?.message;
               const lastMessageTime = lastMessages[conversationId]?.time;
 
-                return (
+              return (
                 <button
                   key={conversationId} // Use conversationId as key to ensure uniqueness
                   className={`flex items-center justify-between gap-3 px-3 py-1.5 rounded-md transition-colors ${
-                  selectedChannel?.conversationId === conversationId
-                    ? 'text-white border border-white rounded '
-                    : 'text-gray-300 hover:bg-muted hover:bg-slate-700 '
+                    selectedChannel?.conversationId === conversationId
+                      ? 'text-white border border-white rounded '
+                      : 'text-gray-300 hover:bg-muted hover:bg-slate-700 '
                   }`}
                   onClick={() => handleChannelClick(employee)}
                 >
                   <div className='flex items-start gap-3 w-full'>
-                  <div className='relative'>
-                    {/* Profile Image */}
-                    <img
-                    src={employee.dp}
-                    alt={employee.name}
-                    className='h-10 w-10 rounded-full object-cover'
-                    />
-                    {/* Online/Offline Icon */}
-                    <span
-                    className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 ${
-                      isOnline ? 'bg-green-600' : 'bg-gray-400'
-                    } border-black`}
-                    title={isOnline ? 'Online' : 'Offline'}
-                    ></span>
-                  </div>
-                  <div className='flex flex-col gap-1'>
-                    <span className='text-base font-medium mr-auto'>
-                    {employee.name.trim(' ')}
-                    </span>
-                    <span className='text-xs text-gray-500'>
-                    {lastMessage?.slice(0, 20)}
-                    </span>
-                  </div>
-                  <div className='flex flex-col items-end gap-1 ml-auto'>
-                    <span className='text-xs text-gray-400'>
-                    {lastMessageTime
-                      ? new Date(lastMessageTime).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                      : ''}
-                    </span>
-                    {unreadCount > 0 && (
-                    <span className='bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full'>
-                      {unreadCount}
-                    </span>
-                    )}
-                  </div>
+                    <div className='relative'>
+                      {/* Profile Image */}
+                      <img
+                        src={employee.dp}
+                        alt={employee.name}
+                        className='h-10 w-10 rounded-full object-cover'
+                      />
+                      {/* Online/Offline Icon */}
+                      <span
+                        className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 ${
+                          isOnline ? 'bg-green-600' : 'bg-gray-400'
+                        } border-black`}
+                        title={isOnline ? 'Online' : 'Offline'}
+                      ></span>
+                    </div>
+                    <div className='flex flex-col text-gray-200 gap-1'>
+                      <span className='text-base font-medium mr-auto'>
+                        {employee.name.trim(' ')}
+                      </span>
+                      <span className='text-sm text-gray-100 font-bold'>
+                        {lastMessage?.slice(0, 20)}
+                      </span>
+                    </div>
+                    <div className='flex flex-col items-end gap-1 ml-auto'>
+                      <span className='text-xs text-gray-400'>
+                        {lastMessageTime
+                          ? new Date(lastMessageTime).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : ''}
+                      </span>
+                      {unreadCount > 0 && (
+                        <span className='bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full'>
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </button>
-                );
+              );
             })}
           </div>
         </div>
