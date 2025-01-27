@@ -56,7 +56,7 @@ const Sidebar = ({
       });
       setUserPresence(presenceMap);
     });
-  
+
     // Updated unread counts handler
     socket.on('unread_counts', (data) => {
       if (data.channels && data.directMessages) {
@@ -88,9 +88,8 @@ const Sidebar = ({
         // Handle individual updates
         const id = data.channelId || data.conversationId;
         const isCurrentUserMessage = data.senderId === user._id;
-        const isSelectedChannel = 
-          selectedChannel?._id === id || 
-          selectedChannel?.conversationId === id;
+        const isSelectedChannel =
+          selectedChannel?._id === id || selectedChannel?.conversationId === id;
 
         // Always update last message
         setLastMessages((prev) => ({
@@ -106,15 +105,15 @@ const Sidebar = ({
           socket.emit('message_read', {
             userId: user._id,
             channelId: data.channelId,
-            conversationId: data.conversationId
+            conversationId: data.conversationId,
           });
-          
+
           // Reset unread count for current conversation
-          setUnreadCounts(prev => ({
+          setUnreadCounts((prev) => ({
             ...prev,
-            [id]: 0
+            [id]: 0,
           }));
-        } 
+        }
         // Only update unread count if it's not current user's message and not selected channel
         else if (!isCurrentUserMessage && !isSelectedChannel) {
           setUnreadCounts((prev) => ({
@@ -180,14 +179,14 @@ const Sidebar = ({
     return [...items].sort((a, b) => {
       const aId = getIdFunc(a);
       const bId = getIdFunc(b);
-      
+
       const aUnread = unreadCounts[aId] || 0;
       const bUnread = unreadCounts[bId] || 0;
-      
+
       if (bUnread !== aUnread) {
         return bUnread - aUnread;
       }
-      
+
       const aTime = lastMessages[aId]?.time || '0';
       const bTime = lastMessages[bId]?.time || '0';
       return new Date(bTime) - new Date(aTime);
@@ -195,18 +194,21 @@ const Sidebar = ({
   };
 
   // Sort channels and employees
-  const sortedChannels = sortByUnreadAndTime(channels, (channel) => channel._id);
+  const sortedChannels = sortByUnreadAndTime(
+    channels,
+    (channel) => channel._id,
+  );
   const sortedEmployees = sortByUnreadAndTime(employees, (employee) => {
     const member = JSON.parse(localStorage.getItem('member'));
     return [member._id, employee._id].sort().join('_');
   });
 
   return (
-    <div className='flex flex-col gap-2 w-1/4 max-h-[100vh] border p-2'>
+    <div className='flex flex-col gap-2 w-1/4 max-h-[90vh] border p-2'>
       {/* Header section remains the same */}
 
-       {/* Header */}
-       <div className='sticky top-0 z-10 bg-background px-4 pb-3 shadow-md'>
+      {/* Header */}
+      <div className='sticky top-0 z-10 bg-background px-4 pb-3 shadow-md'>
         <div className='flex items-center justify-between py-2'>
           <div className='flex gap-2'>
             <h1 className='text-2xl font-bold'>Channels</h1>
@@ -226,11 +228,11 @@ const Sidebar = ({
           />
         </label>
       </div>
-      
+
       <div className='flex flex-col gap-2 flex-1 mt-1'>
         <h2 className='text-lg font-semibold px-4 mb-3'>Joined Channels</h2>
         <div className='flex-1 overflow-auto border-b border-gray-700'>
-          <div className='flex flex-col gap-2 px-4 overflow-y-auto'>
+          <div className='flex flex-col gap-2 px-4 max-h-[30vh] overflow-y-auto'>
             {sortedChannels.map((channel) => {
               const unreadCount = unreadCounts[channel._id] || 0;
               const lastMessage = lastMessages[channel._id]?.message;
@@ -248,7 +250,9 @@ const Sidebar = ({
                 >
                   <div className='flex items-start justify-between w-full'>
                     <div className='flex flex-col flex-grow'>
-                      <span className='font-medium text-sm'># {channel.name}</span>
+                      <span className='font-medium text-sm'>
+                        # {channel.name}
+                      </span>
                       {lastMessage && (
                         <span className='text-xs text-gray-400 truncate max-w-[180px]'>
                           {lastMessage}
@@ -279,10 +283,12 @@ const Sidebar = ({
 
         <div className='flex-1 overflow-auto mt-4'>
           <h2 className='text-lg font-semibold px-4 mb-3'>Direct Messages</h2>
-          <div className='flex flex-col gap-2 px-4 overflow-y-auto'>
+          <div className='flex flex-col gap-2 max-h-[30vh] px-4 overflow-y-auto'>
             {sortedEmployees.map((employee) => {
               const member = JSON.parse(localStorage.getItem('member'));
-              const conversationId = [member._id, employee._id].sort().join('_');
+              const conversationId = [member._id, employee._id]
+                .sort()
+                .join('_');
               const unreadCount = unreadCounts[conversationId] || 0;
               const isOnline = userPresence[employee._id] === 'online';
               const lastMessage = lastMessages[conversationId]?.message;
@@ -312,7 +318,9 @@ const Sidebar = ({
                       />
                     </div>
                     <div className='flex flex-col flex-grow'>
-                      <span className=' text-sm text-start'>{employee.name}</span>
+                      <span className=' text-sm text-start'>
+                        {employee.name}
+                      </span>
                       {lastMessage && (
                         <span className='text-xs text-start font-medium text-gray-400 truncate max-w-[180px]'>
                           {lastMessage}
