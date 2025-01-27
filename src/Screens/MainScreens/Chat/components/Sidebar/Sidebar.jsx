@@ -16,7 +16,7 @@ const Sidebar = ({
 }) => {
   const socket = useSocket();
   const [userPresence, setUserPresence] = useState({});
-  const [unreadCounts, setUnreadCounts] = useState({});
+  const [unreadCounts, setUnreadCounts] = useState({}); // For both channels and DMs
   const [lastMessages, setLastMessages] = useState({}); // To store the last message for each conversation
 
   useEffect(() => {
@@ -81,30 +81,19 @@ const Sidebar = ({
             time: dm.lastMessageTime,
           };
         });
-
-        setUnreadCounts(newUnreadCounts);
-        setLastMessages(newLastMessages);
-      } else {
-        // Handle individual updates
-        const id = data.channelId || data.conversationId;
-        if (id) {
-          setUnreadCounts((prev) => ({
-            ...prev,
-            [id]: data.count,
-          }));
-          setLastMessages((prev) => ({
-            ...prev,
-            [id]: {
-              message: data.lastMessage,
-              time: data.lastMessageTime,
-            },
-          }));
-        }
+      } else if (data.conversationId) {
+        // If it's a single message update
+        const { conversationId, count, lastMessage, lastMessageTime } = data;
+        setUnreadCounts((prevCounts) => ({
+          ...prevCounts,
+          [conversationId]: count,
+        }));
+        setLastMessages((prevMessages) => ({
+          ...prevMessages,
+          [conversationId]: { message: lastMessage, time: lastMessageTime },
+        }));
       }
     });
-
-    // Initial fetch of unread counts
-    socket.emit('fetch_unread_counts', { userId: user._id });
 
     return () => {
       socket.off('all_users_presence');
@@ -197,26 +186,28 @@ const Sidebar = ({
                   }`}
                   onClick={() => handleChannelSelect(channel)}
                 >
-                  <div className="flex items-start justify-between w-full">
-                    <div className="flex flex-col flex-grow">
-                      <span className='font-medium text-sm'># {channel.name}</span>
+                  <div className='flex items-start justify-between w-full'>
+                    <div className='flex flex-col flex-grow'>
+                      <span className='font-medium text-sm'>
+                        # {channel.name}
+                      </span>
                       {lastMessage && (
-                        <span className="text-xs text-gray-400 truncate max-w-[180px]">
+                        <span className='text-xs text-gray-400 truncate max-w-[180px]'>
                           {lastMessage}
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col items-end ml-2">
+                    <div className='flex flex-col items-end ml-2'>
                       {lastMessageTime && (
-                        <span className="text-xs text-gray-400">
+                        <span className='text-xs text-gray-400'>
                           {new Date(lastMessageTime).toLocaleTimeString([], {
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
                           })}
                         </span>
                       )}
                       {unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full mt-1">
+                        <span className='bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full mt-1'>
                           {unreadCount}
                         </span>
                       )}
