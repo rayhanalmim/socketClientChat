@@ -56,8 +56,8 @@ const Sidebar = ({
       });
       setUserPresence(presenceMap);
     });
-
-    // Fix the unread counts handler
+  
+    // Updated unread counts handler
     socket.on('unread_counts', (data) => {
       if (data.channels && data.directMessages) {
         // Handle initial load of all unread counts
@@ -87,17 +87,39 @@ const Sidebar = ({
       } else {
         // Handle individual updates
         const id = data.channelId || data.conversationId;
-        if (id) {
+        const isCurrentUserMessage = data.senderId === user._id;
+        const isSelectedChannel = 
+          selectedChannel?._id === id || 
+          selectedChannel?.conversationId === id;
+
+        // Always update last message
+        setLastMessages((prev) => ({
+          ...prev,
+          [id]: {
+            message: data.lastMessage,
+            time: data.lastMessageTime,
+          },
+        }));
+
+        // If it's the selected channel, mark messages as read
+        if (isSelectedChannel) {
+          socket.emit('message_read', {
+            userId: user._id,
+            channelId: data.channelId,
+            conversationId: data.conversationId
+          });
+          
+          // Reset unread count for current conversation
+          setUnreadCounts(prev => ({
+            ...prev,
+            [id]: 0
+          }));
+        } 
+        // Only update unread count if it's not current user's message and not selected channel
+        else if (!isCurrentUserMessage && !isSelectedChannel) {
           setUnreadCounts((prev) => ({
             ...prev,
             [id]: data.count,
-          }));
-          setLastMessages((prev) => ({
-            ...prev,
-            [id]: {
-              message: data.lastMessage,
-              time: data.lastMessageTime,
-            },
           }));
         }
       }
@@ -110,7 +132,7 @@ const Sidebar = ({
       socket.off('all_users_presence');
       socket.off('unread_counts');
     };
-  }, [socket]);
+  }, [socket, selectedChannel]);
 
   const handleChannelClick = (employee) => {
     const member = JSON.parse(localStorage.getItem('member'));
