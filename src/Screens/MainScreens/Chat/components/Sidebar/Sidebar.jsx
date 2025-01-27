@@ -46,56 +46,40 @@ const Sidebar = ({
 
   useEffect(() => {
     if (!socket) return;
-
+  
     const user = JSON.parse(localStorage.getItem("member"));
-
-    // Fetch presence data
-    socket.on("all_users_presence", (presenceData) => {
-      const presenceMap = {};
-      presenceData.forEach((user) => {
-        presenceMap[user.userId] = user.status;
-      });
-      setUserPresence(presenceMap);
+  
+    // Fetch unread counts for both DMs and channels
+    socket.emit("fetch_unread_counts", {
+      userId: user._id,
+      channelId: selectedChannel?._id, // Include channelId if available
     });
-
-    // Fetch initial unread counts
-    socket.emit("fetch_unread_counts", { userId: user._id });
-
-    // Listen for unread counts and last messages updates (real-time)
+  
     socket.on("unread_counts", (data) => {
       if (Array.isArray(data)) {
-        data.forEach((conversation) => {
-          const { conversationId, count, lastMessage, lastMessageTime } =
-            conversation;
+        data.forEach((item) => {
+          const { conversationId, channelId, count, lastMessage, lastMessageTime } =
+            item;
+  
+          const key = item.isChannel ? channelId : conversationId;
+  
           setUnreadCounts((prevCounts) => ({
             ...prevCounts,
-            [conversationId]: count,
+            [key]: count,
           }));
           setLastMessages((prevMessages) => ({
             ...prevMessages,
-            [conversationId]: { message: lastMessage, time: lastMessageTime },
+            [key]: { message: lastMessage, time: lastMessageTime },
           }));
         });
-      } else if (data.conversationId) {
-        // If it's a single message update
-        const { conversationId, count, lastMessage, lastMessageTime } = data;
-        setUnreadCounts((prevCounts) => ({
-          ...prevCounts,
-          [conversationId]: count,
-        }));
-        setLastMessages((prevMessages) => ({
-          ...prevMessages,
-          [conversationId]: { message: lastMessage, time: lastMessageTime },
-        }));
       }
     });
-
+  
     return () => {
-      socket.off("all_users_presence");
       socket.off("unread_counts");
-      socket.off("recived_dm");
     };
-  }, [socket]);
+  }, [socket, selectedChannel]);
+  
 
   const handleChannelClick = (employee) => {
     const member = JSON.parse(localStorage.getItem("member"));
@@ -117,7 +101,8 @@ const Sidebar = ({
     handleSelectChannelHandler(employee);
   };
 
-  console.log("unread", unreadCounts);
+  console.log("unread count for the direct channel or the dm : ", unreadCounts);
+  console.log("selected channel right now  : ", selectedChannel);
 
   return (
     <div className="flex flex-col gap-2 w-1/4 max-h-[100vh]">
@@ -146,20 +131,20 @@ const Sidebar = ({
       {/* Channels Section */}
       <div className="flex flex-col gap-2 flex-1">
         <h2 className="text-lg font-semibold px-4 mb-3">Joined Channels</h2>
-        <div className="flex-1 overflow-auto border-b">
-          <div className="flex flex-col gap-2 overflow-y-auto">
+        <div className="flex-1 overflow-auto border-b border-gray-700">
+          <div className="flex flex-col gap-2 px-4 overflow-y-auto">
             {channels.map((channel) => (
-              <Button
+              <button
                 key={channel._id}
-                className={`w-full text-left p-2 ${
+                className={`w-full text-left px-4 py-2 rounded-lg transition-all duration-300 ${
                   selectedChannel?._id === channel._id
-                    ? "bg-primary text-black"
-                    : "bg-secondary text-muted-foreground"
+                    ? "bg-gray-700 text-white shadow-md"
+                    : "bg-gray-900 text-gray-400 hover:bg-gray-700 hover:text-white"
                 }`}
                 onClick={() => setSelectedChannel(channel)}
               >
-                {channel.name}
-              </Button>
+                <span className="font-medium text-sm"># {channel.name}</span>
+              </button>
             ))}
           </div>
         </div>
