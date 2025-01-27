@@ -30,6 +30,7 @@ const useChatListeners = ({
 
         socket.emit('join_dm', {
           conversationId: selectedChannel.conversationId,
+          userId,
         });
 
         socket.on('private_message_history', (data) => {
@@ -72,7 +73,10 @@ const useChatListeners = ({
 
       // Typing indicator listeners
       const typingListener = ({ userId, name, conversationId, channelId }) => {
-        setTypingUsers((prev) => [...prev, { userId, name, conversationId, channelId }]);
+        setTypingUsers((prev) => [
+          ...prev,
+          { userId, name, conversationId, channelId },
+        ]);
       };
 
       const stopTypingListener = ({ userId }) => {
