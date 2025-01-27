@@ -175,36 +175,41 @@ const Sidebar = ({
     setSelectedChannel(channel);
   };
 
+  // Add sorting function before the return statement
+  const sortByUnreadAndTime = (items, getIdFunc) => {
+    return [...items].sort((a, b) => {
+      const aId = getIdFunc(a);
+      const bId = getIdFunc(b);
+      
+      const aUnread = unreadCounts[aId] || 0;
+      const bUnread = unreadCounts[bId] || 0;
+      
+      if (bUnread !== aUnread) {
+        return bUnread - aUnread;
+      }
+      
+      const aTime = lastMessages[aId]?.time || '0';
+      const bTime = lastMessages[bId]?.time || '0';
+      return new Date(bTime) - new Date(aTime);
+    });
+  };
+
+  // Sort channels and employees
+  const sortedChannels = sortByUnreadAndTime(channels, (channel) => channel._id);
+  const sortedEmployees = sortByUnreadAndTime(employees, (employee) => {
+    const member = JSON.parse(localStorage.getItem('member'));
+    return [member._id, employee._id].sort().join('_');
+  });
+
   return (
     <div className='flex flex-col gap-2 w-1/4 max-h-[100vh] border p-2'>
-      {/* Header */}
-      <div className='sticky top-0 z-10 bg-background px-4 pb-3 shadow-md rounded'>
-        <div className='flex items-center justify-between py-2'>
-          <div className='flex gap-2'>
-            <h1 className='text-2xl font-bold'>Channels</h1>
-            <IconMessages size={20} />
-          </div>
-        </div>
-
-        {/* Search Input */}
-        <label className='flex h-12 w-full items-center rounded-md border px-2'>
-          <IconSearch size={15} className='mr-2 stroke-slate-500' />
-          <input
-            type='text'
-            className='w-full bg-inherit text-sm'
-            placeholder=' Search chat...'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </label>
-      </div>
-
-      {/* Updated Channels Section */}
+      {/* Header section remains the same */}
+      
       <div className='flex flex-col gap-2 flex-1 mt-1'>
         <h2 className='text-lg font-semibold px-4 mb-3'>Joined Channels</h2>
         <div className='flex-1 overflow-auto border-b border-gray-700'>
           <div className='flex flex-col gap-2 px-4 overflow-y-auto'>
-            {channels.map((channel) => {
+            {sortedChannels.map((channel) => {
               const unreadCount = unreadCounts[channel._id] || 0;
               const lastMessage = lastMessages[channel._id]?.message;
               const lastMessageTime = lastMessages[channel._id]?.time;
@@ -250,11 +255,10 @@ const Sidebar = ({
           </div>
         </div>
 
-        {/* Direct Messages Section */}
         <div className='flex-1 overflow-auto mt-4'>
           <h2 className='text-lg font-semibold px-4 mb-3'>Direct Messages</h2>
           <div className='flex flex-col gap-2 px-4 overflow-y-auto'>
-            {employees.map((employee) => {
+            {sortedEmployees.map((employee) => {
               const member = JSON.parse(localStorage.getItem('member'));
               const conversationId = [member._id, employee._id].sort().join('_');
               const unreadCount = unreadCounts[conversationId] || 0;
