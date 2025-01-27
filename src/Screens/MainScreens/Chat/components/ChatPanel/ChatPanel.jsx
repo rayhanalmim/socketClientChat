@@ -89,7 +89,7 @@ const ChatPanel = ({
   console.log(typingUsers);
 
   return (
-    <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
+    <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm min-h-[100vh]">
       {/* Chat Header */}
       <div className="mb-1 flex justify-between bg-secondary p-4 shadow-lg">
         <div className="flex gap-3">
@@ -119,7 +119,7 @@ const ChatPanel = ({
               )
             ) : (
               <span className="block text-xs text-muted-foreground">
-                Not currently active
+                
               </span>
             )}
           </div>
@@ -160,8 +160,8 @@ const ChatPanel = ({
                 <div
                   className={`relative max-w-72 px-3 py-2 shadow-lg ${
                     isSender
-                      ? "rounded-[16px_16px_0_16px] bg-slate-900 text-white"
-                      : "rounded-[16px_16px_16px_0] bg-slate-900 text-gray-200"
+                      ? "rounded-[16px_16px_0_16px] bg-secondary text-white"
+                      : "rounded-[16px_16px_16px_0] bg-secondary text-gray-200"
                   }`}
                 >
                   {/* Sender Name and Timestamp */}
@@ -269,9 +269,9 @@ const ChatPanel = ({
             {/* File Input for Attachments */}
             <label
               htmlFor="attachment"
-              className="cursor-pointer flex items-center gap-2"
+              className="cursor-pointer px-[2px] flex items-center gap-2"
             >
-              <IconPaperclip size={20} />
+              <IconPaperclip size={20}  />
               <input
                 id="attachment"
                 type="file"
@@ -301,7 +301,7 @@ const ChatPanel = ({
 
           <input
             type="text"
-            placeholder="Type your message..."
+            placeholder=" Type your message..."
             className="flex-1 bg-inherit"
             value={newMessage}
             onChange={(e) => {

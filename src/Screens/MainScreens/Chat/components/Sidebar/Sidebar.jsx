@@ -154,9 +154,9 @@ const Sidebar = ({
   };
 
   return (
-    <div className='flex flex-col gap-2 w-1/4 max-h-[100vh]'>
+    <div className='flex flex-col gap-2 w-1/4 max-h-[100vh] border p-2'>
       {/* Header */}
-      <div className='sticky top-0 z-10 bg-background px-4 pb-3 shadow-md'>
+      <div className='sticky top-0 z-10 bg-background px-4 pb-3 shadow-md rounded'>
         <div className='flex items-center justify-between py-2'>
           <div className='flex gap-2'>
             <h1 className='text-2xl font-bold'>Channels</h1>
@@ -170,7 +170,7 @@ const Sidebar = ({
           <input
             type='text'
             className='w-full bg-inherit text-sm'
-            placeholder='Search chat...'
+            placeholder=' Search chat...'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -178,7 +178,7 @@ const Sidebar = ({
       </div>
 
       {/* Updated Channels Section */}
-      <div className='flex flex-col gap-2 flex-1'>
+      <div className='flex flex-col gap-2 flex-1 mt-1'>
         <h2 className='text-lg font-semibold px-4 mb-3'>Joined Channels</h2>
         <div className='flex-1 overflow-auto border-b border-gray-700'>
           <div className='flex flex-col gap-2 px-4 overflow-y-auto'>
@@ -192,8 +192,8 @@ const Sidebar = ({
                   key={channel._id}
                   className={`w-full text-left px-4 py-2 rounded-lg transition-all duration-300 ${
                     selectedChannel?._id === channel._id
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                      ? 'bg-secondary text-white shadow-lg'
+                      : ' text-gray-400 hover:bg-secondary hover:text-white'
                   }`}
                   onClick={() => handleChannelSelect(channel)}
                 >
@@ -229,7 +229,7 @@ const Sidebar = ({
         </div>
 
         {/* Direct Messages Section */}
-        <div className='flex-1 overflow-auto'>
+        <div className='flex-1 overflow-auto mt-4'>
           <h2 className='text-lg font-semibold px-4 mb-3'>Direct Messages</h2>
           <div className='flex flex-col gap-2 px-4 overflow-y-auto'>
             {employees.map((employee) => {
@@ -245,8 +245,8 @@ const Sidebar = ({
                   key={conversationId}
                   className={`flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-colors ${
                     selectedChannel?.conversationId === conversationId
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                      ? 'bg-secondary text-white shadow-lg'
+                      : ' text-gray-400 hover:bg-secondary hover:text-white'
                   }`}
                   onClick={() => handleChannelClick(employee)}
                 >
@@ -255,7 +255,7 @@ const Sidebar = ({
                       <img
                         src={employee.dp}
                         alt={employee.name}
-                        className='h-8 w-8 rounded-full object-cover'
+                        className='h-8 w-8 rounded-md object-cover'
                       />
                       <span
                         className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 ${
@@ -264,9 +264,9 @@ const Sidebar = ({
                       />
                     </div>
                     <div className='flex flex-col flex-grow'>
-                      <span className='font-medium'>{employee.name}</span>
+                      <span className=' text-sm text-start'>{employee.name}</span>
                       {lastMessage && (
-                        <span className='text-xs text-gray-400 truncate max-w-[180px]'>
+                        <span className='text-xs text-start font-medium text-gray-400 truncate max-w-[180px]'>
                           {lastMessage}
                         </span>
                       )}
