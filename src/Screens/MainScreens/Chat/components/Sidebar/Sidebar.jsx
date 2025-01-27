@@ -47,7 +47,7 @@ const Sidebar = ({
     if (!socket) return;
 
     const user = JSON.parse(localStorage.getItem('member'));
-  
+
     // Fetch presence data
     socket.on('all_users_presence', (presenceData) => {
       const presenceMap = {};
@@ -63,7 +63,7 @@ const Sidebar = ({
         // Handle initial load of all unread counts
         const newUnreadCounts = {};
         const newLastMessages = {};
-  
+
         // Process channel unread counts
         data.channels.forEach((channel) => {
           newUnreadCounts[channel.channelId] = channel.count;
@@ -72,7 +72,7 @@ const Sidebar = ({
             time: channel.lastMessageTime,
           };
         });
-  
+
         // Process DM unread counts
         data.directMessages.forEach((dm) => {
           newUnreadCounts[dm.conversationId] = dm.count;
@@ -81,7 +81,7 @@ const Sidebar = ({
             time: dm.lastMessageTime,
           };
         });
-  
+
         setUnreadCounts(newUnreadCounts);
         setLastMessages(newLastMessages);
       } else {
@@ -91,7 +91,7 @@ const Sidebar = ({
         const isSelectedChannel = 
           selectedChannel?._id === id || 
           selectedChannel?.conversationId === id;
-  
+
         // Always update last message
         setLastMessages((prev) => ({
           ...prev,
@@ -100,9 +100,23 @@ const Sidebar = ({
             time: data.lastMessageTime,
           },
         }));
-  
+
+        // If it's the selected channel, mark messages as read
+        if (isSelectedChannel) {
+          socket.emit('message_read', {
+            userId: user._id,
+            channelId: data.channelId,
+            conversationId: data.conversationId
+          });
+          
+          // Reset unread count for current conversation
+          setUnreadCounts(prev => ({
+            ...prev,
+            [id]: 0
+          }));
+        } 
         // Only update unread count if it's not current user's message and not selected channel
-        if (!isCurrentUserMessage && !isSelectedChannel) {
+        else if (!isCurrentUserMessage && !isSelectedChannel) {
           setUnreadCounts((prev) => ({
             ...prev,
             [id]: data.count,
@@ -110,15 +124,15 @@ const Sidebar = ({
         }
       }
     });
-  
+
     // Initial fetch of unread counts
     socket.emit('fetch_unread_counts', { userId: user._id });
-  
+
     return () => {
       socket.off('all_users_presence');
       socket.off('unread_counts');
     };
-  }, [socket, selectedChannel]); // Added selectedChannel to dependencies
+  }, [socket, selectedChannel]);
 
   const handleChannelClick = (employee) => {
     const member = JSON.parse(localStorage.getItem('member'));
