@@ -80,13 +80,32 @@ const ChatPanel = ({
     setEditedMessageContent(content); // Pre-fill the message content
   };
 
-  const handleSaveEdit = (messageId, isGroupMessage) => {
+  const handleSaveEdit = async (messageId) => {
     if (editedMessageContent.trim()) {
-      updateMessage(messageId, editedMessageContent, isGroupMessage);
+      try {
+        // Make sure messageId exists and is valid
+        if (!messageId) {
+          console.error('Invalid message ID');
+          return;
+        }
+
+        socket.emit('edit_message', {
+          messageId,
+          newContent: editedMessageContent,
+          userId: currentUser._id,
+          // Add channel/conversation context
+          channelId: selectedChannel._id,
+          conversationId: selectedChannel.conversationId
+        });
+
+        // Reset editing state
+        setEditingMessageId(null);
+        setEditedMessageContent('');
+      } catch (error) {
+        console.error('Error editing message:', error);
+      }
     }
   };
-
-  console.log(typingUsers);
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -181,21 +200,33 @@ const ChatPanel = ({
                       <textarea
                         className="w-full bg-gray-700 text-white p-2 rounded"
                         value={editedMessageContent}
-                        onChange={(e) =>
-                          setEditedMessageContent(e.target.value)
-                        }
+                        onChange={(e) => setEditedMessageContent(e.target.value)}
                       />
-                      <button
-                        onClick={() => handleSaveEdit(msg._id, isGroupMessage)}
-                        className="text-blue-500 mt-2"
-                      >
-                        Save
-                      </button>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => handleSaveEdit(msg._id)}
+                          className="text-blue-500 hover:text-blue-400"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingMessageId(null);
+                            setEditedMessageContent('');
+                          }}
+                          className="text-gray-500 hover:text-gray-400"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     hasContent && (
                       <div className="text-gray-400 break-words">
                         {msg.content}
+                        {msg.edited && (
+                          <span className="text-xs text-gray-500 ml-2 italic">(edited)</span>
+                        )}
                       </div>
                     )
                   )}
