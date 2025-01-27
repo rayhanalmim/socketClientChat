@@ -89,7 +89,7 @@ const ChatPanel = ({
   console.log(typingUsers);
 
   return (
-    <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm min-h-[100vh]">
+    <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
       {/* Chat Header */}
       <div className="mb-1 flex justify-between bg-secondary p-4 shadow-lg">
         <div className="flex gap-3">
