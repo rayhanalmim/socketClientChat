@@ -17,7 +17,7 @@ const Sidebar = ({
 }) => {
   const socket = useSocket();
   const [userPresence, setUserPresence] = useState({});
-  const [unreadCounts, setUnreadCounts] = useState({});
+  const [unreadCounts, setUnreadCounts] = useState({}); // For both channels and DMs
   const [lastMessages, setLastMessages] = useState({}); // To store the last message for each conversation
 
   useEffect(() => {
@@ -58,15 +58,18 @@ const Sidebar = ({
       setUserPresence(presenceMap);
     });
 
-    // Fetch initial unread counts
+    // Fetch initial unread counts and last messages
     socket.emit("fetch_unread_counts", { userId: user._id });
 
-    // Listen for unread counts and last messages updates (real-time)
+    // Listen for unread counts and last message updates (real-time)
     socket.on("unread_counts", (data) => {
+      
+
+      console.log("unread_counts", data);
       if (Array.isArray(data)) {
+        // Update for multiple conversations (channels and DMs)
         data.forEach((conversation) => {
-          const { conversationId, count, lastMessage, lastMessageTime } =
-            conversation;
+          const { conversationId, count, lastMessage, lastMessageTime } = conversation;
           setUnreadCounts((prevCounts) => ({
             ...prevCounts,
             [conversationId]: count,
@@ -77,7 +80,7 @@ const Sidebar = ({
           }));
         });
       } else if (data.conversationId) {
-        // If it's a single message update
+        // Update for a single conversation
         const { conversationId, count, lastMessage, lastMessageTime } = data;
         setUnreadCounts((prevCounts) => ({
           ...prevCounts,
