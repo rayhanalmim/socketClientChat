@@ -153,7 +153,6 @@ const Sidebar = ({
     handleSelectChannelHandler(employee);
   };
 
-  console.log('unread', unreadCounts);
 
   // Add this new handler for channel selection
   const handleChannelSelect = (channel) => {

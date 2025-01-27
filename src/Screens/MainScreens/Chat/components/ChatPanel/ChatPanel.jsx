@@ -86,7 +86,28 @@ const ChatPanel = ({
     }
   };
 
-  console.log(typingUsers);
+  const groupedMessages = [];
+  messages.forEach((msg, index) => {
+    if (
+      index === 0 ||
+      msg.senderId !== messages[index - 1].senderId ||
+      new Date(msg.createdAt) - new Date(messages[index - 1].createdAt) > 60000
+    ) {
+      groupedMessages.push({
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        senderImage: msg.senderImage,
+        messages: [msg],
+      });
+    } else {
+      groupedMessages[groupedMessages.length - 1].messages.push(msg);
+    }
+  });
+
+  console.log(
+    "here is the messege from the chat compoennt : ",
+    groupedMessages
+  );
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -128,119 +149,146 @@ const ChatPanel = ({
 
       {/* Chat Messages */}
       <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((msg, index) => {
-          // Skip entirely empty messages
-          const hasContent = msg?.content?.trim();
-          const hasAttachment = msg?.attachment;
-          if (!hasContent && !hasAttachment) return null;
+        {messages
+          .reduce((groupedMessages, msg, index, array) => {
+            // Skip empty messages
+            const hasContent = msg?.content?.trim();
+            const hasAttachment = msg?.attachment;
+            if (!hasContent && !hasAttachment) return groupedMessages;
 
-          const isSender =
-            msg.senderId === JSON.parse(localStorage.getItem("member"))?._id;
-          const isGroupMessage = !!selectedChannel; // Check if it's a group message
+            // Check if the current message is from the same sender as the previous one
+            const previousMsg = array[index - 1];
+            const isSameSender =
+              previousMsg &&
+              previousMsg.senderId === msg.senderId &&
+              previousMsg.senderName === msg.senderName;
 
-          return (
-            <div
-              key={msg._id || index}
-              className={`relative flex ${
-                isSender ? "justify-end" : "justify-start"
-              } mb-4`}
-            >
-              {/* User Image (for received messages) */}
-              {!isSender && msg.senderImage && (
-                <img
-                  src={msg.senderImage}
-                  alt={msg.senderName}
-                  className="w-8 h-8 rounded-full mr-3 mt-2"
-                />
-              )}
+            // Create a new group if the sender changes or is the first message
+            if (!isSameSender) {
+              groupedMessages.push({
+                senderId: msg.senderId,
+                senderName: msg.senderName,
+                senderImage: msg.senderImage,
+                messages: [msg],
+              });
+            } else {
+              // Add the message to the current sender's group
+              groupedMessages[groupedMessages.length - 1].messages.push(msg);
+            }
 
-              {/* Parent Wrapper */}
-              <div className="group relative flex items-center space-x-2">
-                {/* Message Bubble */}
-                <div
-                  className={`relative max-w-72 px-3 py-2 shadow-lg ${
-                    isSender
-                      ? "rounded-[16px_16px_0_16px] bg-secondary text-white"
-                      : "rounded-[16px_16px_16px_0] bg-secondary text-gray-200"
-                  }`}
-                >
-                  {/* Sender Name and Timestamp */}
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-semibold text-white">
-                      {msg?.senderName}
-                    </span>
-                    <span className="text-xs font-light text-gray-400">
-                      {msg?.createdAt &&
-                        format(new Date(msg.createdAt), "h:mm a")}
-                    </span>
+            return groupedMessages;
+          }, [])
+          .map((group, groupIndex) => (
+            <div key={groupIndex} className="space-y-2">
+              {/* Sender Details */}
+              <div
+                className={`relative flex ${
+                  group.senderId ===
+                  JSON.parse(localStorage.getItem("member"))?._id
+                    ? "justify-end"
+                    : "justify-start"
+                }`}
+              >
+                {!(
+                  group.senderId ===
+                  JSON.parse(localStorage.getItem("member"))?._id
+                ) &&
+                  group.senderImage && (
+                    <img
+                      src={group.senderImage}
+                      alt={group.senderName}
+                      className="w-8 h-8 rounded-full mr-3 mt-2"
+                    />
+                  )}
+
+                <div className="flex ">
+                  {/* Sender Name */}
+                  <div>
+                    <div
+                      className={`text-sm font-semibold text-gray-500 ${
+                        group.senderId ===
+                        JSON.parse(localStorage.getItem("member"))?._id
+                          ? "text-right"
+                          : ""
+                      }`}
+                    >
+                      {group.senderName}
+                    </div>
+
+                    {/* Sender Image (for sent messages) */}
+
+                    <div className="space-y-2">
+                      {group.messages.map((msg, msgIndex) => (
+                        <div
+                          key={msg._id || msgIndex}
+                          className={`relative max-w-72 px-3 py-2 shadow-lg ${
+                            group.senderId ===
+                            JSON.parse(localStorage.getItem("member"))?._id
+                              ? "rounded-[16px_16px_0_16px] bg-secondary text-white"
+                              : "rounded-[16px_16px_16px_0] bg-secondary text-gray-200"
+                          }`}
+                        >
+                          {/* Message Content */}
+                          {editingMessageId === msg._id ? (
+                            <div>
+                              <textarea
+                                className="w-full bg-gray-700 text-white p-2 rounded"
+                                value={editedMessageContent}
+                                onChange={(e) =>
+                                  setEditedMessageContent(e.target.value)
+                                }
+                              />
+                              <button
+                                onClick={() =>
+                                  handleSaveEdit(msg._id, !!selectedChannel)
+                                }
+                                className="text-blue-500 mt-2"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            msg.content && (
+                              <div className="text-gray-400 break-words">
+                                {msg.content}
+                              </div>
+                            )
+                          )}
+
+                          {/* Attachment */}
+                          {msg.attachment && (
+                            <div className="mt-2">
+                              <img
+                                src={`${import.meta.env.VITE_APP_SPACES_URL}${
+                                  msg.attachment
+                                }`}
+                                alt="Attachment"
+                                className="rounded-lg max-h-40 object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Message Content */}
-                  {editingMessageId === msg._id ? (
-                    <div>
-                      <textarea
-                        className="w-full bg-gray-700 text-white p-2 rounded"
-                        value={editedMessageContent}
-                        onChange={(e) =>
-                          setEditedMessageContent(e.target.value)
-                        }
-                      />
-                      <button
-                        onClick={() => handleSaveEdit(msg._id, isGroupMessage)}
-                        className="text-blue-500 mt-2"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  ) : (
-                    hasContent && (
-                      <div className="text-gray-400 break-words">
-                        {msg.content}
-                      </div>
-                    )
-                  )}
+                  <div>
+                    {group.senderId ===
+                      JSON.parse(localStorage.getItem("member"))?._id &&
+                      group.senderImage && (
+                        <img
+                          src={group.senderImage}
+                          alt={group.senderName}
+                          className="w-8 h-8 rounded-full ml-3 mt-3"
+                        />
+                      )}
 
-                  {/* Attachment (if any) */}
-                  {hasAttachment && (
-                    <div className="mt-2">
-                      <img
-                        src={`${import.meta.env.VITE_APP_SPACES_URL}${
-                          msg.attachment
-                        }`}
-                        alt="Attachment"
-                        className="rounded-lg max-h-40 object-cover"
-                      />
-                    </div>
-                  )}
+                    {/* Messages from the sender */}
+                  </div>
                 </div>
-
-                {/* Edit Button (for sender's messages) */}
-                {isSender && !editingMessageId && (
-                  <button
-                    onClick={() =>
-                      handleEditClick(msg._id, msg.content, isGroupMessage)
-                    }
-                    className="absolute hidden group-hover:block left-[-24px] top-1"
-                  >
-                    <IconEdit
-                      size={17}
-                      className="text-gray-500 hover:text-gray-300"
-                    />
-                  </button>
-                )}
               </div>
-
-              {/* Sender Image (for sent messages) */}
-              {isSender && msg.senderImage && (
-                <img
-                  src={msg.senderImage}
-                  alt={msg.senderName}
-                  className="w-8 h-8 rounded-full ml-3 mt-2"
-                />
-              )}
             </div>
-          );
-        })}
+          ))}
 
         {/* Typing Users */}
         <div className="my-1">
@@ -271,7 +319,7 @@ const ChatPanel = ({
               htmlFor="attachment"
               className="cursor-pointer px-[2px] flex items-center gap-2"
             >
-              <IconPaperclip size={20}  />
+              <IconPaperclip size={20} />
               <input
                 id="attachment"
                 type="file"
