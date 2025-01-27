@@ -119,7 +119,7 @@ const ChatPanel = ({
               )
             ) : (
               <span className="block text-xs text-muted-foreground">
-                
+                Not currently active
               </span>
             )}
           </div>

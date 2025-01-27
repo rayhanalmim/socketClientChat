@@ -204,6 +204,28 @@ const Sidebar = ({
   return (
     <div className='flex flex-col gap-2 w-1/4 max-h-[100vh] border p-2'>
       {/* Header section remains the same */}
+
+       {/* Header */}
+       <div className='sticky top-0 z-10 bg-background px-4 pb-3 shadow-md'>
+        <div className='flex items-center justify-between py-2'>
+          <div className='flex gap-2'>
+            <h1 className='text-2xl font-bold'>Channels</h1>
+            <IconMessages size={20} />
+          </div>
+        </div>
+
+        {/* Search Input */}
+        <label className='flex h-12 w-full items-center rounded-md border px-2'>
+          <IconSearch size={15} className='mr-2 stroke-slate-500' />
+          <input
+            type='text'
+            className='w-full bg-inherit text-sm'
+            placeholder=' Search chat...'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+      </div>
       
       <div className='flex flex-col gap-2 flex-1 mt-1'>
         <h2 className='text-lg font-semibold px-4 mb-3'>Joined Channels</h2>
