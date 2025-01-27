@@ -15,15 +15,13 @@ const useChatListeners = ({
       const dmMessageListener = (data) => {
         setMessages((prev) => {
           if (userId === data.senderId) {
-            return prev; // Ignore messages sent by the same user
+            return prev;
           }
           return [...prev, data];
         });
       };
 
-      // Leave the previous channel if switching to a new one
       if (selectedChannel.conversationId) {
-        // If the user is switching conversations, leave the previous DM channel
         if (selectedChannel._id) {
           socket.emit('leave_dm', { conversationId: selectedChannel._id });
         }
@@ -39,7 +37,6 @@ const useChatListeners = ({
 
         socket.on('recived_dm', dmMessageListener);
       } else {
-        // Handle leaving and joining the channel (for non-DM channels)
         if (selectedChannel._id) {
           socket.emit('leave_channel', {
             channelId: selectedChannel._id,
@@ -50,28 +47,34 @@ const useChatListeners = ({
         socket.emit('join_channel', { channelId: selectedChannel._id, userId });
       }
 
-      // Error handling
       const errorListener = (errorMessage) => {
         console.error('Error:', errorMessage);
         alert(`Error: ${errorMessage}`);
       };
 
-      // Message history listener
       const messageHistoryListener = (data) => {
         setMessages(data.reverse());
       };
 
-      // New message listener
       const messageListener = (data) => {
         setMessages((prev) => {
           if (userId === data.senderId) {
-            return prev; // Ignore messages sent by the same user
+            return prev;
           }
           return [...prev, data];
         });
       };
 
-      // Typing indicator listeners
+      const messageEditListener = ({ messageId, newContent, edited }) => {
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg._id === messageId
+              ? { ...msg, content: newContent, edited }
+              : msg
+          )
+        );
+      };
+
       const typingListener = ({ userId, name, conversationId, channelId }) => {
         setTypingUsers((prev) => [
           ...prev,
@@ -83,15 +86,14 @@ const useChatListeners = ({
         setTypingUsers((prev) => prev.filter((user) => user.userId !== userId));
       };
 
-      // Register all listeners
       socket.on('error', errorListener);
       socket.on('message_history', messageHistoryListener);
       socket.on('receive_message', messageListener);
+      socket.on('message_edited', messageEditListener);
       socket.on('typing', typingListener);
       socket.on('stop_typing', stopTypingListener);
 
       return () => {
-        // Remove listeners to avoid memory leaks
         socket.off('user_online');
         socket.off('private_message_history');
         socket.off('send_dm', dmMessageListener);
@@ -99,11 +101,12 @@ const useChatListeners = ({
         socket.off('error', errorListener);
         socket.off('message_history', messageHistoryListener);
         socket.off('receive_message', messageListener);
+        socket.off('message_edited', messageEditListener);
         socket.off('typing', typingListener);
         socket.off('stop_typing', stopTypingListener);
       };
     }
-  }, [socket, selectedChannel]);
+  }, [socket, selectedChannel, setMessages, setTypingUsers]);
 };
 
 export default useChatListeners;

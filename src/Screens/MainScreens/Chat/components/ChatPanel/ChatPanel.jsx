@@ -80,8 +80,32 @@ const ChatPanel = ({
     setEditedMessageContent(content); // Pre-fill the message content
   };
 
-  const handleSaveEdit = (messageId, isGroupMessage) => {
+  const handleSaveEdit = async (messageId) => {
     if (editedMessageContent.trim()) {
+      try {
+        // Make sure messageId exists and is valid
+        if (!messageId) {
+          console.error('Invalid message ID');
+          return;
+        }
+
+        socket.emit('edit_message', {
+          messageId,
+          newContent: editedMessageContent,
+          userId: currentUser._id,
+          // Add channel/conversation context
+          channelId: selectedChannel._id,
+          conversationId: selectedChannel.conversationId
+        });
+
+        // Reset editing state
+        setEditingMessageId(null);
+        setEditedMessageContent('');
+      } catch (error) {
+        console.error('Error editing message:', error);
+      }
+    }
+  };
       updateMessage(messageId, editedMessageContent, isGroupMessage);
     }
   };
