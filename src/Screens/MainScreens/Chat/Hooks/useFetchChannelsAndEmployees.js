@@ -25,7 +25,6 @@ const useFetchChannelsAndEmployees = () => {
           }api/channel/getDmUser/${userId}`
         );
         
-        console.log("channel from the db xxxxxxxxxxxx : ", response.data);
 
         const responseEmployee = await axios.get(
           `${
