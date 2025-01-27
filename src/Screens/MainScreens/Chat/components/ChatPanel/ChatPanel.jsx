@@ -106,9 +106,6 @@ const ChatPanel = ({
       }
     }
   };
-      updateMessage(messageId, editedMessageContent, isGroupMessage);
-    }
-  };
 
   const groupedMessages = [];
   messages.forEach((msg, index) => {
