@@ -6,6 +6,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import axios from "axios";
 import sendMessage from "../../utils/sendMessage";
 import useSocket from "../../Hooks/useSocket";
+import Reactions from "./Reaction";
 
 const ChatPanel = ({
   selectedChannel,
@@ -28,7 +29,16 @@ const ChatPanel = ({
   const userId = member?._id;
 
   useEffect(() => {
+    console.log("Updated messages:", messages);
+  }, [messages]);
+
+  useEffect(() => {
     if (!socket || !selectedChannel) return;
+
+    console.log(
+      "channel change triggered from chat panel line 36",
+      selectedChannel
+    );
 
     const roomId = (
       selectedChannel._id || selectedChannel.conversationId
@@ -37,11 +47,15 @@ const ChatPanel = ({
 
     socket.on("reaction_updated", ({ messageId, reactions }) => {
       console.log("reaction_updated event received:", messageId, reactions);
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
+
+      setMessages((prevMessages) => {
+        console.log("Previous messages inside setMessages:", prevMessages);
+        const updatedMessages = prevMessages.map((msg) =>
           msg._id === messageId ? { ...msg, reactions } : msg
-        )
-      );
+        );
+        console.log("Updated messages inside setMessages:", updatedMessages);
+        return updatedMessages;
+      });
     });
 
     return () => {
@@ -85,8 +99,6 @@ const ChatPanel = ({
       setAttachment,
     });
   };
-
-  console.log(messages);
 
   // Update message content function
   const updateMessage = async (messageId, newContent) => {
@@ -155,18 +167,13 @@ const ChatPanel = ({
     }
   });
 
-  console.log(
-    "here is the messege from the chat compoennt : ",
-    groupedMessages
-  );
-
   // Emit add reaction
   const addReaction = (messageId, emoji) => {
     console.log("Add reaction triggered", { messageId, emoji, userId });
     socket.emit("add_reaction", {
       messageId,
       emoji,
-      userId, 
+      userId,
     });
   };
   const removeReaction = (messageId, emoji) => {
@@ -174,9 +181,11 @@ const ChatPanel = ({
     socket.emit("remove_reaction", {
       messageId,
       emoji,
-      userId, 
+      userId,
     });
   };
+
+  console.log("new messege include raction", messages);
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -337,46 +346,12 @@ const ChatPanel = ({
                             </div>
                           )}
                           {/* Reactions Section */}
-                          <div className="flex items-center space-x-2 mt-2">
-                            {/* Group reactions by emoji and then convert to array */}
-                            {msg.reactions &&
-                              Object.entries(
-                                msg.reactions.reduce(
-                                  (acc, { reaction, userId }) => {
-                                    // Group by emoji
-                                    if (!acc[reaction]) {
-                                      acc[reaction] = [];
-                                    }
-                                    acc[reaction].push(userId);
-                                    return acc;
-                                  },
-                                  {}
-                                )
-                              ).map(([emoji, users]) => (
-                                <div
-                                  key={emoji}
-                                  className="flex items-center space-x-1 bg-gray-700 px-2 py-1 rounded-md cursor-pointer"
-                                  onClick={() =>
-                                    users.includes(userId)
-                                      ? removeReaction(msg._id, emoji)
-                                      : addReaction(msg._id, emoji)
-                                  }
-                                >
-                                  <span>{emoji}</span>
-                                  <span className="text-sm text-gray-300">
-                                    {users.length}
-                                  </span>
-                                </div>
-                              ))}
-
-                            {/* Add Reaction Button */}
-                            <button
-                              onClick={() => addReaction(msg._id, "👍")} // Default emoji
-                              className="ml-2 text-blue-400 hover:text-blue-500"
-                            >
-                              + React
-                            </button>
-                          </div>
+                          <Reactions
+                            msg={msg}
+                            userId={userId}
+                            addReaction={addReaction}
+                            removeReaction={removeReaction}
+                          />
                         </div>
                       ))}
                     </div>
