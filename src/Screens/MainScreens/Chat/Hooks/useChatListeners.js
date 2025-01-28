@@ -45,6 +45,8 @@ const useChatListeners = ({
         }
 
         socket.emit('join_channel', { channelId: selectedChannel._id, userId });
+
+        
       }
 
       const errorListener = (errorMessage) => {

@@ -1,15 +1,15 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
 import { IconPaperclip, IconSend, IconEdit } from "@tabler/icons-react";
 import { format, formatDistanceToNow } from "date-fns";
 import axios from "axios";
 import sendMessage from "../../utils/sendMessage";
+import useSocket from "../../Hooks/useSocket";
 
 const ChatPanel = ({
   selectedChannel,
   messages,
-  socket,
   setMessages,
   currentUser,
   typingUsers,
@@ -21,6 +21,34 @@ const ChatPanel = ({
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editedMessageContent, setEditedMessageContent] = useState("");
   const [attachment, setAttachment] = useState(null);
+
+  const socket = useSocket();
+
+  const member = JSON.parse(localStorage.getItem("member"));
+  const userId = member?._id;
+
+  useEffect(() => {
+    if (!socket || !selectedChannel) return;
+
+    const roomId = (
+      selectedChannel._id || selectedChannel.conversationId
+    ).toString();
+    socket.emit("join_channel", { channelId: roomId, userId });
+
+    socket.on("reaction_updated", ({ messageId, reactions }) => {
+      console.log("reaction_updated event received:", messageId, reactions);
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId ? { ...msg, reactions } : msg
+        )
+      );
+    });
+
+    return () => {
+      socket.emit("leave_channel", { channelId: roomId });
+      socket.off("reaction_updated");
+    };
+  }, [socket, selectedChannel]);
 
   const handleFileUpload = async (file) => {
     const reader = new FileReader();
@@ -58,6 +86,8 @@ const ChatPanel = ({
     });
   };
 
+  console.log(messages);
+
   // Update message content function
   const updateMessage = async (messageId, newContent) => {
     try {
@@ -85,24 +115,24 @@ const ChatPanel = ({
       try {
         // Make sure messageId exists and is valid
         if (!messageId) {
-          console.error('Invalid message ID');
+          console.error("Invalid message ID");
           return;
         }
 
-        socket.emit('edit_message', {
+        socket.emit("edit_message", {
           messageId,
           newContent: editedMessageContent,
           userId: currentUser._id,
           // Add channel/conversation context
           channelId: selectedChannel._id,
-          conversationId: selectedChannel.conversationId
+          conversationId: selectedChannel.conversationId,
         });
 
         // Reset editing state
         setEditingMessageId(null);
-        setEditedMessageContent('');
+        setEditedMessageContent("");
       } catch (error) {
-        console.error('Error editing message:', error);
+        console.error("Error editing message:", error);
       }
     }
   };
@@ -129,6 +159,24 @@ const ChatPanel = ({
     "here is the messege from the chat compoennt : ",
     groupedMessages
   );
+
+  // Emit add reaction
+  const addReaction = (messageId, emoji) => {
+    console.log("Add reaction triggered", { messageId, emoji, userId });
+    socket.emit("add_reaction", {
+      messageId,
+      emoji,
+      userId, 
+    });
+  };
+  const removeReaction = (messageId, emoji) => {
+    console.log("Remove reaction triggered", { messageId, emoji, userId });
+    socket.emit("remove_reaction", {
+      messageId,
+      emoji,
+      userId, 
+    });
+  };
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -288,6 +336,47 @@ const ChatPanel = ({
                               />
                             </div>
                           )}
+                          {/* Reactions Section */}
+                          <div className="flex items-center space-x-2 mt-2">
+                            {/* Group reactions by emoji and then convert to array */}
+                            {msg.reactions &&
+                              Object.entries(
+                                msg.reactions.reduce(
+                                  (acc, { reaction, userId }) => {
+                                    // Group by emoji
+                                    if (!acc[reaction]) {
+                                      acc[reaction] = [];
+                                    }
+                                    acc[reaction].push(userId);
+                                    return acc;
+                                  },
+                                  {}
+                                )
+                              ).map(([emoji, users]) => (
+                                <div
+                                  key={emoji}
+                                  className="flex items-center space-x-1 bg-gray-700 px-2 py-1 rounded-md cursor-pointer"
+                                  onClick={() =>
+                                    users.includes(userId)
+                                      ? removeReaction(msg._id, emoji)
+                                      : addReaction(msg._id, emoji)
+                                  }
+                                >
+                                  <span>{emoji}</span>
+                                  <span className="text-sm text-gray-300">
+                                    {users.length}
+                                  </span>
+                                </div>
+                              ))}
+
+                            {/* Add Reaction Button */}
+                            <button
+                              onClick={() => addReaction(msg._id, "👍")} // Default emoji
+                              className="ml-2 text-blue-400 hover:text-blue-500"
+                            >
+                              + React
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
