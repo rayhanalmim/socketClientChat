@@ -42,23 +42,7 @@ const sendMessage = async ({
       attachmentData,
     });
 
-    // Listen for the real-time message event
-    socket.off("recived_dm"); // Remove any existing listener to avoid duplicates
-    socket.on("recived_dm", (message) => {
-
-      console.log("Received DM:", message);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          senderId: message.senderId,
-          senderImage: message.senderImage,
-          senderName: message.senderName,
-          content: message.content,
-          attachment: message.attachment,
-          createdAt: message.createdAt,
-        },
-      ]);
-    });
+  
   } else {
     // Sending a channel message
     let filePath = null;
@@ -82,20 +66,20 @@ const sendMessage = async ({
       timestamp: new Date().toISOString(),
     });
 
-    socket.off("receive_message");
-    socket.on("receive_message", (message) => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          senderId: message.senderId,
-          senderImage: message.senderImage,
-          senderName: message.senderName,
-          content: message.content,
-          attachment: message.attachment,
-          createdAt: message.createdAt,
-        },
-      ]);
-    });
+    // socket.off("receive_message");
+    // socket.on("receive_message", (message) => {
+    //   setMessages((prevMessages) => [
+    //     ...prevMessages,
+    //     {
+    //       senderId: message.senderId,
+    //       senderImage: message.senderImage,
+    //       senderName: message.senderName,
+    //       content: message.content,
+    //       attachment: message.attachment,
+    //       createdAt: message.createdAt,
+    //     },
+    //   ]);
+    // });
   }
 
   // Clear input and attachment fields

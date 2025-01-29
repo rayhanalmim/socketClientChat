@@ -40,11 +40,13 @@ const ChatPanel = ({
       selectedChannel
     );
 
-    const roomId = (
-      selectedChannel._id || selectedChannel.conversationId
-    ).toString();
+    if(selectedChannel._id){
+      socket.emit("join_channel", { channelId: selectedChannel._id, userId });
+    }else{
+      socket.emit("join_dm", { conversationId: selectedChannel.conversationId, userId });
+    }
 
-    socket.emit("join_channel", { channelId: roomId, userId });
+    
 
     socket.on("reaction_updated", ({ messageId, reactions }) => {
       console.log("reaction_updated event received:", messageId, reactions);  
@@ -60,7 +62,8 @@ const ChatPanel = ({
     });
 
     return () => {
-      socket.emit("leave_channel", { channelId: roomId });
+      socket.emit("leave_channel", { channelId: selectedChannel._id });
+      socket.emit("leave_dm", { conversationId: selectedChannel.conversationId });
       socket.off("reaction_updated");
     };
   }, [socket, selectedChannel]);
