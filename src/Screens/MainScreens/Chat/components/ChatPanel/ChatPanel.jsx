@@ -44,7 +44,7 @@ const ChatPanel = ({
       selectedChannel._id || selectedChannel.conversationId
     ).toString();
 
-    // socket.emit("join_channel", { channelId: roomId, userId });
+    socket.emit("join_channel", { channelId: roomId, userId });
 
     socket.on("reaction_updated", ({ messageId, reactions }) => {
       console.log("reaction_updated event received:", messageId, reactions);  
