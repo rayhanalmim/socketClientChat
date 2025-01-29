@@ -1,0 +1,239 @@
+[33mcommit 266ed34f176e4ef088f510abbd1f8cf241353f67[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Wed Jan 29 12:50:04 2025 +0600
+
+    added
+
+[33mcommit 02861e3fb98e1ef671c660c0bd09714549c4826c[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Wed Jan 29 12:32:39 2025 +0600
+
+    fixed tooltip
+
+[33mcommit 66c312fd32fdd7bfc25f07090660980962b6b88c[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Wed Jan 29 12:22:20 2025 +0600
+
+    refactor: enhance reaction handling and improve chat panel structure
+
+[33mcommit 2f4e26c14777f2f1109df460bb1ea4a24473f6ac[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Wed Jan 29 11:08:59 2025 +0600
+
+    added reaction hover
+
+[33mcommit a9079d15ec26d7109fcba611bbe5b7960ae55558[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Wed Jan 29 10:59:36 2025 +0600
+
+    fixed position
+
+[33mcommit 9d6761ad865f81551a365b2416387208e379e735[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Wed Jan 29 10:41:34 2025 +0600
+
+    added emoji
+
+[33mcommit 709767febfd1bc29f3bfd25133ac8bd6a74a169b[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Tue Jan 28 18:20:41 2025 +0600
+
+    updated code
+
+[33mcommit 58211b9c2d17e863450e8499e82403961a1ffaa1[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Tue Jan 28 16:25:16 2025 +0600
+
+    added reaction functionality
+
+[33mcommit f72933c3e1b403ea19cdd07cf01b917a207eb447[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 17:59:00 2025 +0600
+
+    updated code
+
+[33mcommit 3b8dc2addadadff3f4a1ee361f1680c86a050aa9[m
+Merge: 07fdc5c aff8a6f
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 17:58:22 2025 +0600
+
+    Merge branch 'main' of https://github.com/The-Antopolis/socket.io-test-admin
+
+[33mcommit 07fdc5cdff8f3fae30486f6aca114a809b5ef1e4[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 17:55:31 2025 +0600
+
+    feat: implement message grouping by sender in ChatPanel component
+
+[33mcommit aff8a6f6bc63a75c3bdcfba6b0106345e0b4d51c[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 16:56:49 2025 +0600
+
+    added edit message
+
+[33mcommit 07e280bfa06d83b01c051156c15ad6d04ab9c612[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 16:02:42 2025 +0600
+
+    fixed sidebar vh
+
+[33mcommit b6edf61ac32fc279f304fc9e76ece5f01fdf0b69[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 15:52:30 2025 +0600
+
+    feat: add search input and update status message in ChatPanel and Sidebar components
+
+[33mcommit 90ef342b022f1c3201797f5b2a55eab60641cb14[m
+Merge: d6bd704 941480c
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 15:48:56 2025 +0600
+
+    Merge branch 'main' of https://github.com/The-Antopolis/socket.io-test-admin
+
+[33mcommit d6bd7040d09e87bd862db8d3fd4a966b9d11f4da[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 15:48:53 2025 +0600
+
+    fix: remove unnecessary min-height from ChatPanel component
+
+[33mcommit 941480c0f9ca992749ce3ede64e980e52c06f593[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 15:46:28 2025 +0600
+
+    added some ui changes and message sort
+
+[33mcommit f10f59874e90d26756565d99cfb3dd5780baeb32[m
+Merge: 95ffbcc 304e558
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 15:42:46 2025 +0600
+
+    Merge branch 'main' of https://github.com/The-Antopolis/socket.io-test-admin
+
+[33mcommit 95ffbcc273222ab84d30ae3ebcae3f22f9a8cae7[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 15:42:43 2025 +0600
+
+    refactor: update favicon and title; enhance layout and styling in ChatPanel and Sidebar components
+
+[33mcommit 304e558f25dbd7d31a92650187b04212f5f1f4be[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 15:04:30 2025 +0600
+
+    added sidebar count fix
+
+[33mcommit 9edaa517d978044056fc01c38886abfab387aa19[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 14:47:59 2025 +0600
+
+    added some minor fix
+
+[33mcommit ac6d1e579e04913f79a0b0494bfe4c0c0318ed0a[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 13:28:12 2025 +0600
+
+    added count
+
+[33mcommit 06726eb77d71daf9811bb1e84a06612594db43b6[m
+Merge: c3adafa 3e73d11
+Author: Rayhan Al Mim <119398683+rayhanalmim@users.noreply.github.com>
+Date:   Mon Jan 27 13:07:25 2025 +0600
+
+    Merge pull request #1 from The-Antopolis/redis
+    
+    Redis
+
+[33mcommit 3e73d11d05250da6fa115903dd67523d9c42bf54[m[33m ([m[1;31morigin/redis[m[33m, [m[1;32mredis[m[33m)[m
+Merge: f2ccd5d 4a2aae9
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 12:52:07 2025 +0600
+
+    Merge branch 'redis' of https://github.com/The-Antopolis/socket.io-test-admin into redis
+
+[33mcommit f2ccd5da104ddc12cb4107c85296c39e41c206fd[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Mon Jan 27 12:51:37 2025 +0600
+
+    add unread count
+
+[33mcommit 4a2aae950c8d947afdc82a4daeeb0a05071e3148[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 12:14:25 2025 +0600
+
+    refactor: enhance comments in Sidebar component for clarity on unread counts and last messages
+
+[33mcommit de407170d3dbb7d83b2181ce6645ff1bb1599624[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 11:43:11 2025 +0600
+
+    refactor: clean up Sidebar component code and improve readability
+
+[33mcommit a59af02fb9568fbaf3023081cb9fe0cdea3d0b3b[m
+Merge: 96adb02 03e9b40
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 11:21:19 2025 +0600
+
+    Merge branch 'redis' of https://github.com/The-Antopolis/socket.io-test-admin into redis
+
+[33mcommit 96adb025e24f8b100b7d260023a36ad2124b27c1[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Mon Jan 27 11:20:45 2025 +0600
+
+    refactor Sidebar component to improve unread counts handling and enhance channel selection UI
+
+[33mcommit 03e9b40680fed6400b58739057c8f3dc1570925a[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Sun Jan 26 18:15:19 2025 +0600
+
+    refactor: enhance Sidebar component layout and styling for better readability
+
+[33mcommit ee5cd14091a7453f186f383c8854547aeca9a773[m
+Merge: 27680bc 2ae368a
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Sun Jan 26 18:12:00 2025 +0600
+
+    Merge branch 'redis' of https://github.com/The-Antopolis/socket.io-test-admin into redis
+
+[33mcommit 27680bc7b0dae4d9c0645dd3801d4a7f3f0a2a9a[m
+Merge: 91fcabd 8c7602e
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Sun Jan 26 18:11:55 2025 +0600
+
+    Merge branch 'redis' of https://github.com/The-Antopolis/socket.io-test-admin into redis
+
+[33mcommit 2ae368ad4212768180dc9cfda92c96cb2c698514[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Sun Jan 26 18:11:09 2025 +0600
+
+    fix: correct typo in dmMessageListener and improve channel switching logic in useChatListeners
+
+[33mcommit 91fcabdf508867656e96e05c79c7b37d14cb047d[m
+Author: Jubayer-Cmd <sheikhabujubayer@gmail.com>
+Date:   Sun Jan 26 18:09:53 2025 +0600
+
+    refactor Sidebar component for improved readability and consistency in code style
+
+[33mcommit 8c7602e24049b3a7214d58342ff8476eebaf1d7f[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Sun Jan 26 17:48:37 2025 +0600
+
+    fix: trim whitespace from employee name in Sidebar component
+
+[33mcommit e7f0ea5b89fbd8810b6fdc92665d856d31b406e9[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Sun Jan 26 17:47:32 2025 +0600
+
+    refactor Sidebar component to handle last messages and improve unread counts management
+
+[33mcommit 5d916817fb3cc16157cd1faf6d7715ae678239cc[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Sun Jan 26 16:31:57 2025 +0600
+
+    refactor Sidebar and sendMessage components to enhance unread counts handling and improve message sending logic
+
+[33mcommit f7b719621ec5ea15d3c0d4d9f59c56c5bf5cf0d5[m
+Author: rayhanalmim <rayhanalmim1@gmail.com>
+Date:   Sun Jan 26 15:22:44 2025 +0600
+
+    refactor socket event handling for unread counts and typing indicators in Chat components
+
+[33mcommit 89e3e1
