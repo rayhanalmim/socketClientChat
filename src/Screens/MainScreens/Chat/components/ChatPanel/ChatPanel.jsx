@@ -23,7 +23,7 @@ const ChatPanel = ({
   const [editedMessageContent, setEditedMessageContent] = useState("");
   const [attachment, setAttachment] = useState(null);
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
-
+  const [reactionPickerVisible, setReactionPickerVisible] = useState(null);
 
   const socket = useSocket();
 
@@ -42,16 +42,17 @@ const ChatPanel = ({
       selectedChannel
     );
 
-    if(selectedChannel._id){
+    if (selectedChannel._id) {
       socket.emit("join_channel", { channelId: selectedChannel._id, userId });
-    }else{
-      socket.emit("join_dm", { conversationId: selectedChannel.conversationId, userId });
+    } else {
+      socket.emit("join_dm", {
+        conversationId: selectedChannel.conversationId,
+        userId,
+      });
     }
 
-    
-
     socket.on("reaction_updated", ({ messageId, reactions }) => {
-      console.log("reaction_updated event received:", messageId, reactions);  
+      console.log("reaction_updated event received:", messageId, reactions);
 
       setMessages((prevMessages) => {
         console.log("Previous messages inside setMessages:", prevMessages);
@@ -65,7 +66,9 @@ const ChatPanel = ({
 
     return () => {
       socket.emit("leave_channel", { channelId: selectedChannel._id });
-      socket.emit("leave_dm", { conversationId: selectedChannel.conversationId });
+      socket.emit("leave_dm", {
+        conversationId: selectedChannel.conversationId,
+      });
       socket.off("reaction_updated");
     };
   }, [socket, selectedChannel]);
@@ -106,8 +109,6 @@ const ChatPanel = ({
     });
   };
 
-
-
   const handleSaveEdit = async (messageId) => {
     if (editedMessageContent.trim()) {
       try {
@@ -134,7 +135,6 @@ const ChatPanel = ({
       }
     }
   };
-  
 
   const groupedMessages = [];
   messages.forEach((msg, index) => {
@@ -281,63 +281,85 @@ const ChatPanel = ({
                     {/* Sender Image (for sent messages) */}
 
                     <div className="space-y-2">
-                    {group.messages.map((msg, msgIndex) => (
-  <div
-    key={msg._id || msgIndex}
-    className={`relative max-w-72 px-3 py-2 shadow-lg group ${
-      group.senderId === JSON.parse(localStorage.getItem("member"))?._id
-        ? "rounded-[16px_16px_0_16px] bg-secondary text-white"
-        : "rounded-[16px_16px_16px_0] bg-secondary text-gray-200"
-    }`}
-    onMouseEnter={() => setHoveredMessageId(msg._id)}
-    onMouseLeave={() => setHoveredMessageId(null)}
-  >
-    {/* Edit Mode */}
-    {editingMessageId === msg._id ? (
-      <div>
-        <textarea
-          className="w-full bg-gray-700 text-white p-2 rounded"
-          value={editedMessageContent}
-          onChange={(e) => setEditedMessageContent(e.target.value)}
-        />
-        <button onClick={() => handleSaveEdit(msg._id)} className="text-blue-500 mt-2">
-          Save
-        </button>
-      </div>
-    ) : (
-      // Normal Message Display
-      msg.content && <div className="text-gray-400 break-words">{msg.content}</div>
-    )}
+                      {group.messages.map((msg, msgIndex) => (
+                        <div
+                          key={msg._id || msgIndex}
+                          className={`relative max-w-72 px-3 py-2 shadow-lg group ${
+                            group.senderId ===
+                            JSON.parse(localStorage.getItem("member"))?._id
+                              ? "rounded-[16px_16px_0_16px] bg-secondary text-white"
+                              : "rounded-[16px_16px_16px_0] bg-secondary text-gray-200"
+                          }`}
+                          onMouseEnter={() => setHoveredMessageId(msg._id)}
+                          onMouseLeave={() => setHoveredMessageId(null)}
+                        >
+                          {/* Edit Mode */}
+                          {editingMessageId === msg._id ? (
+                            <div>
+                              <textarea
+                                className="w-full bg-gray-700 text-white p-2 rounded"
+                                value={editedMessageContent}
+                                onChange={(e) =>
+                                  setEditedMessageContent(e.target.value)
+                                }
+                              />
+                              <button
+                                onClick={() => handleSaveEdit(msg._id)}
+                                className="text-blue-500 mt-2"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            // Normal Message Display
+                            msg.content && (
+                              <div className="text-gray-400 break-words">
+                                {msg.content}
+                                {msg.edited && <span className="text-xs text-gray-500 ml-2">(Edited)</span>}
+                              </div>
+                            )
+                          )}
 
-    {/* Show Edit Icon on Hover */}
-    {hoveredMessageId === msg._id && group.senderId === currentUser._id && (
-      <button
-        className="absolute top-1 right-1 text-gray-300 hover:text-white"
-        onClick={() => {
-          setEditingMessageId(msg._id);
-          setEditedMessageContent(msg.content);
-        }}
-      >
-        <IconEdit size={16} />
-      </button>
-    )}
+                          {/* Show Edit Icon on Hover */}
+                          {hoveredMessageId === msg._id &&
+                            group.senderId === currentUser._id && (
+                              <button
+                                className="absolute top-1 right-1 text-gray-300 hover:text-white"
+                                onClick={() => {
+                                  setEditingMessageId(msg._id);
+                                  setEditedMessageContent(msg.content);
+                                }}
+                              >
+                                <IconEdit size={16} />
+                              </button>
+                            )}
 
-    {/* Attachment */}
-    {msg.attachment && (
-      <div className="mt-2">
-        <img
-          src={`${import.meta.env.VITE_APP_SPACES_URL}${msg.attachment}`}
-          alt="Attachment"
-          className="rounded-lg max-h-40 object-cover"
-        />
-      </div>
-    )}
+                          {/* Attachment */}
+                          {msg.attachment && (
+                            <div className="mt-2">
+                              <img
+                                src={`${import.meta.env.VITE_APP_SPACES_URL}${
+                                  msg.attachment
+                                }`}
+                                alt="Attachment"
+                                className="rounded-lg max-h-40 object-cover"
+                              />
+                            </div>
+                          )}
 
-    {/* Reactions Section */}
-    <Reactions msg={msg} userId={userId} addReaction={addReaction} removeReaction={removeReaction} />
-  </div>
-))}
-
+                          {/* Reactions Section */}
+                          <Reactions
+                            msg={msg}
+                            userId={userId}
+                            addReaction={addReaction}
+                            removeReaction={removeReaction}
+                            isPickerVisible={
+                              reactionPickerVisible === msg._id
+                            }
+                            onClose={() => setReactionPickerVisible(null)}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
