@@ -44,7 +44,7 @@ const ChatPanel = ({
 
     if (selectedChannel._id) {
       socket.emit("join_channel", { channelId: selectedChannel._id, userId });
-    } else {
+    } else if (selectedChannel.conversationId) {
       socket.emit("join_dm", {
         conversationId: selectedChannel.conversationId,
         userId,
@@ -65,10 +65,14 @@ const ChatPanel = ({
     });
 
     return () => {
-      socket.emit("leave_channel", { channelId: selectedChannel._id });
-      socket.emit("leave_dm", {
-        conversationId: selectedChannel.conversationId,
-      });
+      if (selectedChannel._id) {
+        socket.emit("leave_channel", { channelId: selectedChannel._id });
+      }
+      if (selectedChannel.conversationId) {
+        socket.emit("leave_dm", {
+          conversationId: selectedChannel.conversationId,
+        });
+      }
       socket.off("reaction_updated");
     };
   }, [socket, selectedChannel]);
@@ -315,7 +319,11 @@ const ChatPanel = ({
                             msg.content && (
                               <div className="text-gray-400 break-words">
                                 {msg.content}
-                                {msg.edited && <span className="text-xs text-gray-500 ml-2">(Edited)</span>}
+                                {msg.edited && (
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    (Edited)
+                                  </span>
+                                )}
                               </div>
                             )
                           )}
@@ -353,9 +361,7 @@ const ChatPanel = ({
                             userId={userId}
                             addReaction={addReaction}
                             removeReaction={removeReaction}
-                            isPickerVisible={
-                              reactionPickerVisible === msg._id
-                            }
+                            isPickerVisible={reactionPickerVisible === msg._id}
                             onClose={() => setReactionPickerVisible(null)}
                           />
                         </div>
