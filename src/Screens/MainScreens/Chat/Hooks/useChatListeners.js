@@ -63,10 +63,12 @@ const useChatListeners = ({
       };
 
       const messageListener = (data) => {
+
+        console.log('data from the messageListener xxxxxxxxxxxxx', data);
         setMessages((prev) => {
-          if (userId === data.senderId) {
-            return prev;
-          }
+          // if (userId === data.senderId) {
+          //   return prev;
+          // }
           return [...prev, data];
         });
       };
