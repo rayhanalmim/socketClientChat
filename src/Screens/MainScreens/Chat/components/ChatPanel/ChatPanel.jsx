@@ -43,10 +43,11 @@ const ChatPanel = ({
     const roomId = (
       selectedChannel._id || selectedChannel.conversationId
     ).toString();
-    socket.emit("join_channel", { channelId: roomId, userId });
+
+    // socket.emit("join_channel", { channelId: roomId, userId });
 
     socket.on("reaction_updated", ({ messageId, reactions }) => {
-      console.log("reaction_updated event received:", messageId, reactions);
+      console.log("reaction_updated event received:", messageId, reactions);  
 
       setMessages((prevMessages) => {
         console.log("Previous messages inside setMessages:", prevMessages);
@@ -100,27 +101,7 @@ const ChatPanel = ({
     });
   };
 
-  // Update message content function
-  const updateMessage = async (messageId, newContent) => {
-    try {
-      const endpoint = selectedChannel._id
-        ? `api/message/group/${selectedChannel._id}/message/${messageId}`
-        : `api/message/dm/${selectedChannel.conversationId}/message/${messageId}`;
 
-      await axios.put(`${import.meta.env.VITE_APP_BACKEND_URL}${endpoint}`, {
-        content: newContent,
-      });
-
-      setEditingMessageId(null); // Reset edit state
-    } catch (error) {
-      console.error("Error updating message:", error);
-    }
-  };
-
-  const handleEditClick = (messageId, content) => {
-    setEditingMessageId(messageId); // Start editing the message
-    setEditedMessageContent(content); // Pre-fill the message content
-  };
 
   const handleSaveEdit = async (messageId) => {
     if (editedMessageContent.trim()) {
@@ -184,8 +165,6 @@ const ChatPanel = ({
       userId,
     });
   };
-
-  console.log("new messege include raction", messages);
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">

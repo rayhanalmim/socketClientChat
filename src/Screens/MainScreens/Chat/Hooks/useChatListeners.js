@@ -13,10 +13,12 @@ const useChatListeners = ({
       socket.emit('user_online', { userId });
 
       const dmMessageListener = (data) => {
+
+        console.log('data from the dmMessageListener xxxxxxxxxxxxx', data);
         setMessages((prev) => {
-          if (userId === data.senderId) {
-            return prev;
-          }
+          // if (userId === data.senderId) {
+          //   return prev;
+          // }
           return [...prev, data];
         });
       };
@@ -30,6 +32,8 @@ const useChatListeners = ({
           conversationId: selectedChannel.conversationId,
           userId,
         });
+
+        console.log("join dm successfully")
 
         socket.on('private_message_history', (data) => {
           setMessages(data.reverse());
