@@ -57,24 +57,44 @@ const useChatListeners = ({
 
       const messageHistoryListener = (data) => {
         setMessages(data.reverse());
-
-        console.log('recived data inside the histoty listener', data);
-
+      
+        console.log("Received data inside the history listener", data);
+      
+        // Emit "mark_message_seen" for the latest message
         if (selectedChannel._id) {
+          socket.emit("mark_message_seen", {
+            channelId: selectedChannel._id,
+            userId,
+            messageId: data[data.length - 1]._id,
+          });
         }
-        socket.emit("mark_message_seen", {
-          channelId: selectedChannel._id,
-          userId,
-          messageId: data[data.length - 1]._id,
+      
+        // Remove the previous event listener to prevent memory leaks
+        socket.off("message_seen_update");
+      
+        // Listen for "message_seen_update" from the server
+        socket.on("message_seen_update", ({ messageId, seenUsers }) => {
+          console.log("Here is the message seen", messageId, seenUsers);
+        
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) => {
+              if (msg._id === messageId) {
+                const newSeenUsers = seenUsers.filter(
+                  (newUser) => !msg.seenBy.some((existingUser) => existingUser._id === newUser._id)
+                );
+        
+                return {
+                  ...msg,
+                  seenBy: [...msg.seenBy, ...newSeenUsers],
+                };
+              }
+              return msg;
+            })
+          );
         });
-
-        socket.on('message_seen_update', ({
-          messageId,
-          seenUsers,
-        }) => {
-             console.log("here is the message seen", messageId, seenUsers);
-        });
+        
       };
+      
 
       const messageListener = (data) => {
         setMessages((prev) => {
@@ -115,6 +135,7 @@ const useChatListeners = ({
 
       return () => {
         socket.off("user_online");
+        
         socket.off("private_message_history");
         socket.off("send_dm", dmMessageListener);
         socket.off("recived_dm");

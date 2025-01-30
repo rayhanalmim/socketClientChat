@@ -24,15 +24,14 @@ const ChatPanel = ({
   const [attachment, setAttachment] = useState(null);
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
   const [reactionPickerVisible, setReactionPickerVisible] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   const socket = useSocket();
 
   const member = JSON.parse(localStorage.getItem("member"));
   const userId = member?._id;
 
-  useEffect(() => {
-    console.log("Updated messages:", messages);
-  }, [messages]);
+
 
   useEffect(() => {
     if (!socket || !selectedChannel) return;
@@ -115,6 +114,7 @@ const ChatPanel = ({
 
   const handleSaveEdit = async (messageId) => {
     if (editedMessageContent.trim()) {
+      console.log("Editing message:", { messageId, editedMessageContent });
       try {
         // Make sure messageId exists and is valid
         if (!messageId) {
@@ -317,12 +317,38 @@ const ChatPanel = ({
                           ) : (
                             // Normal Message Display
                             msg.content && (
-                              <div className="text-gray-400 break-words">
+                              <div className="text-gray-400 break-words relative">
                                 {msg.content}
                                 {msg.edited && (
                                   <span className="text-xs text-gray-500 ml-2">
                                     (Edited)
                                   </span>
+                                )}
+
+                                {/* Seen Users Display */}
+                                {msg.seenBy.length > 0 && (
+                                  <div className="flex items-center mt-1 space-x-1">
+                                    {msg.seenBy
+                                      .slice(0, 3)
+                                      .map((user, index) => (
+                                        <div>
+                                          <img
+                                            key={user._id}
+                                            src={
+                                              user.dp 
+                                            } 
+                                            alt={user.name}
+                                            title={user.name}
+                                            className="w-5 h-5 rounded-full border border-gray-500"
+                                          />
+                                        </div>
+                                      ))}
+                                    {msg.seenBy.length > 3 && (
+                                      <span className="text-xs text-gray-500">
+                                        +{msg.seenBy.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             )
