@@ -1,12 +1,17 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
-import { IconPaperclip, IconSend, IconEdit } from "@tabler/icons-react";
+import {
+  IconPaperclip,
+  IconSend,
+  IconEdit,
+  IconMoodSmile,
+} from "@tabler/icons-react";
 import { format, formatDistanceToNow } from "date-fns";
-import axios from "axios";
 import sendMessage from "../../utils/sendMessage";
 import useSocket from "../../Hooks/useSocket";
-import Reactions from "./Reaction";
+import Reactions from "./Reaction"; // Replace with your icon library if needed
+import { toast } from "sonner";
 
 const ChatPanel = ({
   selectedChannel,
@@ -30,8 +35,6 @@ const ChatPanel = ({
 
   const member = JSON.parse(localStorage.getItem("member"));
   const userId = member?._id;
-
-
 
   useEffect(() => {
     if (!socket || !selectedChannel) return;
@@ -75,6 +78,22 @@ const ChatPanel = ({
       socket.off("reaction_updated");
     };
   }, [socket, selectedChannel]);
+
+  // In the component where you manage socket connections, add the error listener
+useEffect(() => {
+  if (!socket) return;
+  // Listen for the error event
+  socket.on("error", (clientMessage) => {
+    toast.error(clientMessage);  // Or show it in the UI as per your design
+    console.error(clientMessage); // You can also log it to the console for debugging
+  });
+
+  // Clean up listener when the component unmounts
+  return () => {
+    socket.off("error");
+  };
+}, [socket]);
+
 
   const handleFileUpload = async (file) => {
     const reader = new FileReader();
@@ -268,24 +287,28 @@ const ChatPanel = ({
                     />
                   )}
 
-                <div className="flex ">
+                <div className="flex flex-col">
                   {/* Sender Name */}
-                  <div>
-                    <div
-                      className={`text-sm font-semibold text-gray-500 ${
-                        group.senderId ===
-                        JSON.parse(localStorage.getItem("member"))?._id
-                          ? "text-right"
-                          : ""
-                      }`}
-                    >
-                      {group.senderName}
-                    </div>
+                  <div
+                    className={`text-sm font-semibold text-gray-500 ${
+                      group.senderId ===
+                      JSON.parse(localStorage.getItem("member"))?._id
+                        ? "text-right"
+                        : ""
+                    }`}
+                  >
+                    {group.senderName}
+                  </div>
 
-                    {/* Sender Image (for sent messages) */}
+                  <div className="space-y-2">
+                    {group.messages.map((msg, msgIndex) => {
+                      // Format the createdAt timestamp to display time in HH:mm format
+                      const formattedTime = format(
+                        new Date(msg.createdAt),
+                        "hh:mm a"
+                      );
 
-                    <div className="space-y-2">
-                      {group.messages.map((msg, msgIndex) => (
+                      return (
                         <div
                           key={msg._id || msgIndex}
                           className={`relative max-w-72 px-3 py-2 shadow-lg group ${
@@ -297,6 +320,7 @@ const ChatPanel = ({
                           onMouseEnter={() => setHoveredMessageId(msg._id)}
                           onMouseLeave={() => setHoveredMessageId(null)}
                         >
+                     
                           {/* Edit Mode */}
                           {editingMessageId === msg._id ? (
                             <div>
@@ -317,7 +341,7 @@ const ChatPanel = ({
                           ) : (
                             // Normal Message Display
                             msg.content && (
-                              <div className="text-gray-400 break-words relative">
+                              <div className="text-gray-400 break-words relative ">
                                 {msg.content}
                                 {msg.edited && (
                                   <span className="text-xs text-gray-500 ml-2">
@@ -331,12 +355,9 @@ const ChatPanel = ({
                                     {msg.seenBy
                                       .slice(0, 3)
                                       .map((user, index) => (
-                                        <div>
+                                        <div key={user._id}>
                                           <img
-                                            key={user._id}
-                                            src={
-                                              user.dp 
-                                            } 
+                                            src={user.dp}
                                             alt={user.name}
                                             title={user.name}
                                             className="w-5 h-5 rounded-full border border-gray-500"
@@ -358,7 +379,7 @@ const ChatPanel = ({
                           {hoveredMessageId === msg._id &&
                             group.senderId === currentUser._id && (
                               <button
-                                className="absolute top-1 right-1 text-gray-300 hover:text-white"
+                                className="absolute top-1 -left-4 text-gray-300 hover:text-white"
                                 onClick={() => {
                                   setEditingMessageId(msg._id);
                                   setEditedMessageContent(msg.content);
@@ -390,24 +411,27 @@ const ChatPanel = ({
                             isPickerVisible={reactionPickerVisible === msg._id}
                             onClose={() => setReactionPickerVisible(null)}
                           />
+
+                          {/* Display Formatted Time (Top-right corner) */}
+                          <div className="absolute -top-1 right-2 text-xs text-gray-500 mt-1">
+                            {formattedTime}
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
+                </div>
 
-                  <div>
-                    {group.senderId ===
-                      JSON.parse(localStorage.getItem("member"))?._id &&
-                      group.senderImage && (
-                        <img
-                          src={group.senderImage}
-                          alt={group.senderName}
-                          className="w-8 h-8 rounded-full ml-3 mt-3"
-                        />
-                      )}
-
-                    {/* Messages from the sender */}
-                  </div>
+                <div>
+                  {group.senderId ===
+                    JSON.parse(localStorage.getItem("member"))?._id &&
+                    group.senderImage && (
+                      <img
+                        src={group.senderImage}
+                        alt={group.senderName}
+                        className="w-8 h-8 rounded-full ml-3 mt-3"
+                      />
+                    )}
                 </div>
               </div>
             </div>

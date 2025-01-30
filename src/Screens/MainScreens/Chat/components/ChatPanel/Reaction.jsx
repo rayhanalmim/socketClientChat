@@ -1,3 +1,4 @@
+import { IconMoodSmile } from "@tabler/icons-react";
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -56,12 +57,12 @@ const Reactions = ({ msg, userId, addReaction, removeReaction }) => {
         </div>
       ))}
 
-      {/* Reaction Picker Button */}
+      {/* Reaction Picker Button (Smiley Icon) */}
       <button
         onClick={() => setReactionPickerVisible(!reactionPickerVisible)}
         className="ml-2 text-blue-400 hover:text-blue-500"
       >
-        + React
+        <IconMoodSmile size={16} />
       </button>
 
       {/* Reaction Picker */}

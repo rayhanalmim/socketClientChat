@@ -52,7 +52,7 @@ const useChatListeners = ({
 
       const errorListener = (errorMessage) => {
         console.error("Error:", errorMessage);
-        alert(`Error: ${errorMessage}`);
+        toast.error(`Error: ${errorMessage}`);
       };
 
       const messageHistoryListener = (data) => {

@@ -9,6 +9,7 @@ import { Button } from "@antopolis/admin-component-library/dist/ui";
 
 import { FormWrapper } from "@antopolis/admin-component-library/dist/form";
 import { useAxiosInstance } from "../../../Hooks/Instances/useAxiosInstance";
+import { toast } from "sonner";
 
 export default function UpdateCourse({ id = null, setEditModal, toggleFetch, ...props }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +56,7 @@ export default function UpdateCourse({ id = null, setEditModal, toggleFetch, ...
       }
     } catch (error) {
       console.error("Fetch error:", error);
-      setError("An error occurred while fetching course data.");
+      toast.error("An error occurred while fetching course data.");
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +78,7 @@ export default function UpdateCourse({ id = null, setEditModal, toggleFetch, ...
       setCategories(response.data);
     } catch (err) {
       console.error("Error fetching categories:", err);
-      setError("Failed to fetch categories.");
+      toast.error("Failed to fetch categories.");
     } finally {
       setIsLoading(false);
     }

@@ -10,6 +10,7 @@ import axiosChannelInstance from "../../../Hooks/Instances/useAxiosCourseInstanc
 import { COURSE_APIS } from "./APIs/CourseAPIs";
 
 import { Button } from "@antopolis/admin-component-library/dist/ui";
+import { toast } from "sonner";
 
 // eslint-disable-next-line react/prop-types
 export default function CreateChannel({ setCreateModal, toggleFetch, ...props }) {
@@ -32,7 +33,7 @@ export default function CreateChannel({ setCreateModal, toggleFetch, ...props })
         console.error("Failed to create channel:", response.data);
       }
     } catch (error) {
-      console.error("Error during channel creation:", error);
+      toast.error("Error during channel creation:", error);
     } finally {
       setIsLoading(false);
     }

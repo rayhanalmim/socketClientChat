@@ -50,7 +50,7 @@ function Channels() {
         const response = await axiosChannelInstance.get(ALL_CHANNEL_API);
         setData(response.data);
       } catch (error) {
-        console.error("Error fetching channels:", error);
+        toast.error("Error fetching channels:", error);
       }
     }
       fetchData();
