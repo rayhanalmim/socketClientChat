@@ -1,18 +1,17 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@antopolis/admin-component-library/dist/input-otp-BqpTxPZb";
-import { IconPaperclip, IconSend, IconEdit } from "@tabler/icons-react";
+import {
+  IconPaperclip,
+  IconSend,
+  IconEdit,
+  IconMoodSmile,
+} from "@tabler/icons-react";
 import { format, formatDistanceToNow } from "date-fns";
+import sendMessage from "../../utils/sendMessage";
 import useSocket from "../../Hooks/useSocket";
-import Reactions from "./Component/Reaction";
-
-// Import utis and hooks
-import handleFileUpload from "../ChatPanel/chatUtils/handleFileUpload";
-import handleSendMessage from "../ChatPanel/chatUtils/handleSendMessage";
-import handleSaveEdit from "../ChatPanel/chatUtils/handleSaveEdit";
-import addReaction from "../ChatPanel/chatUtils/addReaction";
-import removeReaction from "../ChatPanel/chatUtils/removeReaction";
-import { useSocketEvents } from "./Hook/useSocketEvents";
+import Reactions from "./Component/Reaction"; // Replace with your icon library if needed
+import { toast } from "sonner";
 
 const ChatPanel = ({
   selectedChannel,
@@ -37,7 +36,163 @@ const ChatPanel = ({
   const member = JSON.parse(localStorage.getItem("member"));
   const userId = member?._id;
 
-  useSocketEvents({ socket, selectedChannel, userId, setMessages });
+  useEffect(() => {
+    if (!socket || !selectedChannel) return;
+
+    console.log(
+      "channel change triggered from chat panel line 36",
+      selectedChannel
+    );
+
+    if (selectedChannel._id) {
+      socket.emit("join_channel", { channelId: selectedChannel._id, userId });
+    } else if (selectedChannel.conversationId) {
+      socket.emit("join_dm", {
+        conversationId: selectedChannel.conversationId,
+        userId,
+      });
+    }
+
+    socket.on("reaction_updated", ({ messageId, reactions }) => {
+      console.log("reaction_updated event received:", messageId, reactions);
+
+      setMessages((prevMessages) => {
+        console.log("Previous messages inside setMessages:", prevMessages);
+        const updatedMessages = prevMessages.map((msg) =>
+          msg._id === messageId ? { ...msg, reactions } : msg
+        );
+        console.log("Updated messages inside setMessages:", updatedMessages);
+        return updatedMessages;
+      });
+    });
+
+    return () => {
+      if (selectedChannel._id) {
+        socket.emit("leave_channel", { channelId: selectedChannel._id });
+      }
+      if (selectedChannel.conversationId) {
+        socket.emit("leave_dm", {
+          conversationId: selectedChannel.conversationId,
+        });
+      }
+      socket.off("reaction_updated");
+    };
+  }, [socket, selectedChannel]);
+
+  // In the component where you manage socket connections, add the error listener
+  useEffect(() => {
+    if (!socket) return;
+    // Listen for the error event
+    socket.on("error", (clientMessage) => {
+      toast.error(clientMessage); // Or show it in the UI as per your design
+      console.error(clientMessage); // You can also log it to the console for debugging
+    });
+
+    // Clean up listener when the component unmounts
+    return () => {
+      socket.off("error");
+    };
+  }, [socket]);
+
+  const handleFileUpload = async (file) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64Data = reader.result.split(",")[1]; // Extract the Base64 data
+      const attachment = {
+        data: base64Data,
+        mimetype: file.type,
+        name: file.name,
+      };
+
+      // Update attachment state
+      setAttachment(attachment);
+    };
+
+    reader.onerror = (error) => {
+      console.error("File upload error:", error);
+      setAttachment(null); // Clear attachment on error
+    };
+  };
+
+  // The sendMessageHandler now needs to pass the attachment state as well
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+
+    sendMessage({
+      socket,
+      selectedChannel,
+      newMessage,
+      setMessages,
+      setNewMessage,
+      attachment,
+      setAttachment,
+    });
+  };
+
+  const handleSaveEdit = async (messageId) => {
+    if (editedMessageContent.trim()) {
+      console.log("Editing message:", { messageId, editedMessageContent });
+      try {
+        // Make sure messageId exists and is valid
+        if (!messageId) {
+          console.error("Invalid message ID");
+          return;
+        }
+
+        socket.emit("edit_message", {
+          messageId,
+          newContent: editedMessageContent,
+          userId: currentUser._id,
+          // Add channel/conversation context
+          channelId: selectedChannel._id,
+          conversationId: selectedChannel.conversationId,
+        });
+
+        // Reset editing state
+        setEditingMessageId(null);
+        setEditedMessageContent("");
+      } catch (error) {
+        console.error("Error editing message:", error);
+      }
+    }
+  };
+
+  const groupedMessages = [];
+  messages.forEach((msg, index) => {
+    if (
+      index === 0 ||
+      msg.senderId !== messages[index - 1].senderId ||
+      new Date(msg.createdAt) - new Date(messages[index - 1].createdAt) > 60000
+    ) {
+      groupedMessages.push({
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        senderImage: msg.senderImage,
+        messages: [msg],
+      });
+    } else {
+      groupedMessages[groupedMessages.length - 1].messages.push(msg);
+    }
+  });
+
+  // Emit add reaction
+  const addReaction = (messageId, emoji) => {
+    console.log("Add reaction triggered", { messageId, emoji, userId });
+    socket.emit("add_reaction", {
+      messageId,
+      emoji,
+      userId,
+    });
+  };
+  const removeReaction = (messageId, emoji) => {
+    console.log("Remove reaction triggered", { messageId, emoji, userId });
+    socket.emit("remove_reaction", {
+      messageId,
+      emoji,
+      userId,
+    });
+  };
 
   return (
     <div className="w-3/4 flex flex-col rounded-md border bg-primary-foreground shadow-sm">
@@ -77,7 +232,7 @@ const ChatPanel = ({
         </div>
       </div>
 
-      {/* Chat section */}
+      {/* Chat Messages */}
       <div className="flex flex-col flex-1 overflow-y-auto p-4 space-y-3">
         {messages
           .reduce((groupedMessages, msg, index, array) => {
@@ -175,17 +330,7 @@ const ChatPanel = ({
                                 }
                               />
                               <button
-                                onClick={() =>
-                                  handleSaveEdit(
-                                    editingMessageId,
-                                    editedMessageContent,
-                                    socket,
-                                    currentUser,
-                                    selectedChannel,
-                                    setEditingMessageId,
-                                    setEditedMessageContent
-                                  )
-                                }
+                                onClick={() => handleSaveEdit(msg._id)}
                                 className="text-blue-500 mt-2"
                               >
                                 Save
@@ -259,12 +404,8 @@ const ChatPanel = ({
                           <Reactions
                             msg={msg}
                             userId={userId}
-                            addReaction={(messageId, emoji) =>
-                              addReaction(messageId, emoji, socket, userId)
-                            }
-                            removeReaction={(messageId, emoji) =>
-                              removeReaction(messageId, emoji, socket, userId)
-                            }
+                            addReaction={addReaction}
+                            removeReaction={removeReaction}
                             isPickerVisible={reactionPickerVisible === msg._id}
                             onClose={() => setReactionPickerVisible(null)}
                           />
@@ -314,22 +455,8 @@ const ChatPanel = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input form */}
-      <form
-        className="flex gap-2 p-4"
-        onSubmit={(e) =>
-          handleSendMessage(
-            e,
-            socket,
-            selectedChannel,
-            newMessage,
-            setMessages,
-            setNewMessage,
-            attachment,
-            setAttachment
-          )
-        }
-      >
+      {/* Message Input */}
+      <form className="flex gap-2 p-4" onSubmit={handleSendMessage}>
         <div className="flex flex-1 items-center gap-2 rounded-md border px-2 py-1">
           <div className="space-x-1">
             {/* File Input for Attachments */}
@@ -343,7 +470,9 @@ const ChatPanel = ({
                 type="file"
                 className="hidden"
                 onChange={(e) => {
-                  handleFileUpload(e.target.files[0], setAttachment);
+                  const file = e.target.files[0];
+                  handleFileUpload(file);
+                  e.target.value = ""; // Reset the input value to allow re-selection of the same file
                 }}
               />
             </label>
@@ -365,7 +494,7 @@ const ChatPanel = ({
 
           <input
             type="text"
-            placeholder="Type your message..."
+            placeholder=" Type your message..."
             className="flex-1 bg-inherit"
             value={newMessage}
             onChange={(e) => {
